@@ -1,0 +1,34 @@
+{
+  "name": "qmock",
+  "version": "0.0.0",
+  "description": "quick class and object mocking for unit tests",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/andrasq/node-qmock"
+  },
+  "main": "index.js",
+  "author": {
+    "name": "Andras",
+    "url": "http://github.com/andrasq"
+  },
+  "engines": {
+    "node": ">=0.0.0"
+  },
+  "scripts": {
+    "test": "nodeunit"
+  },
+  "keywords": [
+    "Andras",
+    "quick",
+    "mock",
+    "mocking",
+    "unit",
+    "testing"
+  ],
+  "dependencies": {
+  },
+  "devDependencies": {
+    "nodeunit": "*"
+  }
+}
