@@ -1,6 +1,6 @@
 {
   "name": "qmock",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "quick class and object mocking for unit tests",
   "license": "Apache-2.0",
   "repository": {
@@ -27,6 +27,7 @@
     "testing"
   ],
   "dependencies": {
+    "arlib": ">0.0.23"
   },
   "devDependencies": {
     "nodeunit": "*"
