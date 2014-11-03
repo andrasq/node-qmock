@@ -152,7 +152,7 @@ module.exports = {
             t.done();
         },
 
-        'should throw execption': function(t) {
+        'should throw exception': function(t) {
             var mock = QMock.getMock({}, ['m']);
             mock.expects(1).method('m').will(QMock.throwException(new Error("error")));
             try { var ret = mock.m(); t.ok(false); }
@@ -174,6 +174,16 @@ module.exports = {
             var expect = mock.expects(QMock.any()).method('test');
             for (i=0; i<20; i++) mock.test();
             t.equal(expect.callCount, 20);
+            t.done();
+        },
+
+        'should return values onConsecutiveValues': function(t) {
+            var mock = QMock.getMock({ m: function() { return 123; } });
+            mock.expects(3).method('m').will(QMock.onConsecutiveCalls(1, 2, 3));
+            t.equal(mock.m(), 1);
+            t.equal(mock.m(), 2);
+            t.equal(mock.m(), 3);
+            t.equal(mock.m(), undefined);
             t.done();
         },
     },
