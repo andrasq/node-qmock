@@ -38,7 +38,7 @@ module.exports = {
             t.done();
         },
 
-        'should suppress mocked methods': function(t) {
+        'should stub out mocked methods': function(t) {
             var wasCalled = false;
             var obj = { m: function() { wasCalled = true; assert(false, "should not be called"); } };
             var mock = QMock.getMock(obj, ['m']);
@@ -58,6 +58,28 @@ module.exports = {
             var obj = { };
             var mock = QMock.getMock(obj, ['m']);
             mock.m();
+            t.done();
+        },
+
+        'should stub out all methods if methodsToStub is true or undefined': function(t) {
+            var obj = {a: function(){ return 1; }, b: function(){ return 2; }};
+            var i, yesStub = [true, 1, undefined];
+            for (i=0; i<yesStub.length; i++) {
+                var mock = QMock.getMock(obj, yesStub[i]);
+                t.equal(mock.a(), undefined, yesStub[i] + " should stub out methods");
+                t.equal(mock.b(), undefined, yesStub[i] + " should stub out methods");
+            }
+            t.done();
+        },
+
+        'should not stub out any methods methodsToStub is [] or null or false': function(t) {
+            var obj = {a: function(){ return 1; }, b: function(){ return 2; }};
+            var i, noStub = [null, [], false];
+            for (i=0; i<noStub.length; i++) {
+                var mock = QMock.getMock(obj, noStub[i]);
+                t.equal(mock.a(), 1, noStub[i] + " should not stub out methods");
+                t.equal(mock.b(), 2, noStub[i] + " should not stub out methods");
+            }
             t.done();
         },
 
