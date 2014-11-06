@@ -21,6 +21,11 @@ module.exports = {
         done();
     },
 
+    'package.json should be valid json': function(t) {
+        var contents = require('../package.json');
+        t.done();
+    },
+
     'QMock': {
         'should return a clone of the object': function(t) {
             var i;
