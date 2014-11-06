@@ -177,8 +177,10 @@ module.exports = {
         'should throw exception': function(t) {
             var mock = QMock.getMock({}, ['m']);
             mock.expects(1).method('m').will(QMock.throwException(new Error("error")));
-            try { var ret = mock.m(); t.ok(false); }
-            catch (err) { t.ok(true); }
+            try { var ret = mock.m(); t.ok(false); } catch (err) { t.ok(true); }
+            // also works as throwError()
+            mock.expects(1).method('n').will(QMock.throwError(new Error("error")));
+            try { var ret = mock.n(); t.ok(false); } catch (err) { t.ok(true); }
             t.done();
         },
 
@@ -206,6 +208,60 @@ module.exports = {
             t.equal(mock.m(), 2);
             t.equal(mock.m(), 3);
             t.equal(mock.m(), undefined);
+            t.done();
+        },
+
+        'should check call parameters': function(t) {
+            var mock = QMock.getMock({});
+            mock.expects(1).method('m').with(1,2,3);
+            mock.m(1,2,3);
+            try {
+                mock.m(1,3,2);
+                mock.check();
+                t.ok(false);
+            } catch (err) { t.ok(err.toString().indexOf("wrong arguments") > 0); }
+            t.done();
+        },
+
+        'should check call parameters on consecutive calls': function(t) {
+            // QMock can check call params of multiple consecutive calls
+            // the last call params specified are matched against all future calls too
+            var mock = QMock.getMock({});
+            mock.method('m').with(1).with(2);
+            mock.m(1);
+            mock.m(2);
+            mock.m(2);
+            try { mock.m(3); t.ok(false); } catch (err) { t.ok(true); }
+            t.done();
+        },
+    },
+
+    'nodeunit': {
+        'should extend nodeunit tester with mocks': function(t) {
+            QMock.extendWithMocks(t, 'done');
+            var mock = t.getMock({});
+            mock.method('m').willReturn('proper and correct return value');
+            t.equal(mock.m(), 'proper and correct return value');
+            t.done();
+        },
+
+        'should assert that expecteds were fulfilled': function(t) {
+            QMock.extendWithMocks(t, 'done');
+            var mock = t.getMock({}, ['m']);
+            mock.expects(QMock.twice()).method('m');
+            try {
+                t.done();
+                t.ok(false, "method not called, assertion should throw error");
+            }
+            catch (err) {
+                t.ok(err.toString().indexOf("called 0 times, expected 2") > 0);
+                t.ok(true);
+                // t.done() is true, assertion error was thrown after test shut down
+            }
+        },
+
+        'should not be affected by preceding expecteds': function(t) {
+            QMock.extendWithMocks(t, 'done');
             t.done();
         },
     },
