@@ -1,6 +1,6 @@
 {
   "name": "qmock",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "quick class and object mocking for unit tests",
   "license": "Apache-2.0",
   "repository": {
@@ -24,11 +24,13 @@
     "mock",
     "mocking",
     "unit",
+    "dependency",
+    "injection",
     "testing",
     "unittest"
   ],
   "dependencies": {
-    "arlib": "0.0.23"
+    "mongoid-js": "1.0.0"
   },
   "devDependencies": {
     "nodeunit": "0.9.0"
