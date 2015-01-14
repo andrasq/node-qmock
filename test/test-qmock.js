@@ -161,6 +161,22 @@ module.exports = {
                 }
                 t.done();
             },
+
+            'should return function': function(t) {
+                var mock = QMock.getMock();
+                mock.expects(1).method('m').will(QMock.returnValue(function(){ return 1234; }));
+                ret = mock.m();
+                t.equal('function', typeof ret);
+                t.done();
+            },
+
+            'should return computed value': function(t) {
+                var mock = QMock.getMock();
+                mock.expects(1).method('m').will(QMock.returnComputedValue(function(){ return 1234 }));
+                ret = mock.m();
+                t.equal(1234, ret);
+                t.done();
+            },
         },
 
         'should return argument': function(t) {
