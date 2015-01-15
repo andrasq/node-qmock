@@ -242,6 +242,15 @@ module.exports = {
             t.done();
         },
 
+        'should check call count': function(t) {
+            var mock = QMock.getMock();
+            mock.expects(2).method('test');
+            mock.test();
+            try { mock.check(); t.ok(false); }
+            catch (err) { t.ok(true); }
+            t.done();
+        },
+
         'should return values onConsecutiveValues': function(t) {
             var mock = QMock.getMock({ m: function() { return 123; } });
             mock.expects(3).method('m').will(QMock.onConsecutiveCalls(1, 2, 3));
@@ -254,7 +263,7 @@ module.exports = {
 
         'should check call parameters': function(t) {
             var mock = QMock.getMock({});
-            mock.expects(1).method('m').with(1,2,3);
+            mock.expects(2).method('m').with(1,2,3);
             mock.m(1,2,3);
             try {
                 mock.m(1,3,2);
@@ -272,7 +281,8 @@ module.exports = {
             mock.m(1);
             mock.m(2);
             mock.m(2);
-            try { mock.m(3); t.ok(false); } catch (err) { t.ok(true); }
+            try { mock.m(3); mock.check(); t.ok(false); }
+            catch (err) { t.ok(true); }
             t.done();
         },
     },
