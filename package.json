@@ -1,6 +1,6 @@
 {
   "name": "qmock",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "quick class and object mocking for unit tests",
   "license": "Apache-2.0",
   "repository": {

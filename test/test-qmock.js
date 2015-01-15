@@ -251,6 +251,18 @@ module.exports = {
             t.done();
         },
 
+        'should return error if specified': function(t) {
+            var mock = QMock.getMock();
+            mock.expects(0).method('test');
+            mock.test();
+            var err = QMock.check(mock, true);
+            t.ok(err.toString().indexOf("called 1 times, expected 0") > 0);
+            var err2 = mock.check(true);
+            // TODO: why are the (thrown) err and err2 not the same object?
+            t.deepEqual(err, err2);
+            t.done();
+        },
+
         'should return values onConsecutiveValues': function(t) {
             var mock = QMock.getMock({ m: function() { return 123; } });
             mock.expects(3).method('m').will(QMock.onConsecutiveCalls(1, 2, 3));
