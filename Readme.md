@@ -40,7 +40,7 @@ Example
         mock.expects(1).method('boom').will(QMock.throwError(new Error("BOOM!")));
         mock.boom();            // error throw, BOOM!
 
-TODO
+Todo
 ----
 
 - qmocks are awkward the way they hook into unit tests.  For nodeunit,

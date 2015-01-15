@@ -149,6 +149,26 @@ module.exports = {
         },
     },
 
+    'getMockSkipConstructor': {
+        'should return an instanceof constructor with inherited properties': function(t) {
+            var Ctor = function(){ };
+            Ctor.prototype.x = 1;
+            var mock = QMock.getMockSkipConstructor(Ctor);
+            t.ok(mock instanceof Ctor);
+            t.equal(mock.x, 1);
+            t.done();
+        },
+
+        'should not call constructor': function(t) {
+            var called = false;
+            var Ctor = function(){ called = true; };
+            var mock = QMock.getMockSkipConstructor(Ctor);
+            t.ok(mock instanceof Ctor);
+            t.ok(!called);
+            t.done();
+        },
+    },
+
     'Expected': {
         'returnValue': {
             'should return scalars': function(t) {
