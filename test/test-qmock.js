@@ -301,6 +301,7 @@ module.exports = {
 
     'nodeunit': {
         'should extend nodeunit tester with mocks': function(t) {
+            if (t.getMock) t.skip();
             QMock.extendWithMocks(t, 'done');
             var mock = t.getMock({});
             mock.method('m').willReturn('proper and correct return value');
@@ -309,6 +310,7 @@ module.exports = {
         },
 
         'should assert that expecteds were fulfilled': function(t) {
+            if (t.getMock) t.skip();
             QMock.extendWithMocks(t, 'done');
             var mock = t.getMock({}, ['m']);
             mock.expects(QMock.twice()).method('m');
@@ -324,6 +326,7 @@ module.exports = {
         },
 
         'should not be affected by preceding expecteds': function(t) {
+            if (t.getMock) t.skip();
             QMock.extendWithMocks(t, 'done');
             t.done();
         },
