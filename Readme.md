@@ -40,6 +40,89 @@ Example
         mock.expects(1).method('boom').will(QMock.throwError(new Error("BOOM!")));
         mock.boom();            // error throw, BOOM!
 
+
+Api
+---
+
+### qmock.getMock( master, methodNames [,constructorArgs] )
+
+If master is a class (a constructor function), returns a mock object built with the
+given constructorArgs.
+
+If master is an object, an identical object is cloned.  The clone will be
+instanceof the same class as `master`, and will have the same own and inherited
+properties as `master`.
+
+In both cases, some or all of the named methods are replaced by no-op stubs.  If
+`methodNames` is given as falsy, no methods are stubbed; if an Array, the named
+methods are stubbed; if not passed, all methods are stubbed.
+
+Example:
+
+    var fakeLogger = qmock.getMock({}, ['log']);
+    fakeLogger.log("test message");
+
+### qmock.getMockSkipConstructor( master, methodNames )
+
+Build a mock object like `getMock` but do not initialize the object.  The returned
+object will still have the instance, own and inherited properties of `master`, but
+will be completely un-initialized.
+
+If master is an existing object, this call is identical to `getMock`.
+
+### qmock.stub( object, methodName [,userFunction] )
+
+Replace the named method of `object` with the user function, and return a stub that
+will contain information about calls to the method.  This can be used to override
+or rewrite method calls.
+
+If a user function is not specified, the original method is used.  This form is
+useful for passive "spying" on method calls.
+
+The returned stub object has a method `restore()` that will remove the stub and
+restore the original method onto the object.
+
+Example:
+
+    var qmock = require('qmock');
+    var assert = require('assert');
+    var stub = qmock.stub(process, 'exit', function(){});
+    process.exit();
+    process.exit();
+    console.log("still here");
+    assert(stub.callCount == 2);
+    stub.restore();
+    process.exit();
+    console.log("this line will not appear");
+
+### qmock.mockTimers( )
+
+Replace the nodejs timers functions `setImmediate`, `clearImmediate`, `setTimeout`
+et al with mocked versions whose time is not linear and is not limited by real
+time.  Returns a clock object.  To restore the timers back to what they were when
+mockTimers was called, call `clock.uninstall()`.
+
+The returned `clock` object has methods:
+
+#### clock.tick( [n] )
+
+Advance the time by `n` milliseconds.  Immediates and timeouts are run as they come
+due.  0 milliseconds runs only the immediates.  The default is 1 millisecond.
+
+#### clock.install( )
+
+Override the built-in `setImmediate`, `setTimeout` etc functions with mocks.
+This is already done by `mockTimers`.
+
+#### clock.uninstall( )
+
+Restore the original `setImmediate`, `setTimeout` etc functions.
+
+Mock Objects
+------------
+
+
+
 Todo
 ----
 
@@ -57,3 +140,5 @@ Todo
   called with arguments but the method return value as well
 
 - add returnCallback() method to return err, for callbacks not just direct returns
+
+- clone un-enumerable properties as well, retaining their original definitions
