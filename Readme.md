@@ -52,3 +52,8 @@ Todo
 - the nodejs property getter/setter methods should make it possible for data
   properties to be mocked too, eg getMockValue(name).  with() could map to
   set, will() to get.
+
+- introduce a havingReturned() method to be able to inspect not just the
+  called with arguments but the method return value as well
+
+- add returnCallback() method to return err, for callbacks not just direct returns
