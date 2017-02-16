@@ -102,21 +102,35 @@ et al with mocked versions whose time is not linear and is not limited by real
 time.  Returns a clock object.  To restore the timers back to what they were when
 mockTimers was called, call `clock.uninstall()`.
 
-The returned `clock` object has methods:
+This function can be called any number of times, each call replaces the previous
+timers calls in effect with a new set.
 
-#### clock.tick( [n] )
+Returns a `clock` with a method `tick( [n] )` that advances time by `n`
+milliseconds (default 1).  Immediates and timeouts are run as they come due,
+immediates before timeouts.  0 milliseconds runs only the immediates.
 
-Advance the time by `n` milliseconds.  Immediates and timeouts are run as they come
-due.  0 milliseconds runs only the immediates.  The default is 1 millisecond.
+#### qmock.restoreTimers( )
 
-#### clock.install( )
+Restore the original nodejs `setImmediate`, `setTimeout` etc functions no matter
+how many times they were overridden with `mockTimers`.
 
-Override the built-in `setImmediate`, `setTimeout` etc functions with mocks.
-This is already done by `mockTimers`.
+Example:
 
-#### clock.uninstall( )
-
-Restore the original `setImmediate`, `setTimeout` etc functions.
+    var qmock = require('qmock');
+    var clock = qmock.mockTimers();
+    setTimeout(function() {
+        console.log("timeout");
+        setImmediate(function() {
+            console.log("immediate");
+            qmock.restoreTimers();
+        });
+    }, 10);
+    clock.tick(9);
+    // => (nothing)
+    clock.tick(1);
+    // => "timeout"
+    clock.tick(0);
+    // => "immediate"
 
 Mock Objects
 ------------
