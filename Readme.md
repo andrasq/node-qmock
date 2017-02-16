@@ -106,14 +106,25 @@ timers calls in effect with a new set.  Note that any pending immediates and tim
 in the system timers will still trigger, but with follow-up timeouts queued into the
 mock.
 
-Returns a `clock` with a method `tick( [n] )` that advances time by `n`
-milliseconds (default 1).  Immediates and timeouts are run as they come due,
-immediates before timeouts.  0 milliseconds runs only the immediates.
+Returns a mock timeouts `clock`.
 
-`Clock` also has a few properties of interest, `immediates` which is the array of
-immediate tasks that will execute on the next event loop `tick`, and `timeouts` which
-is a hash of array of timeouts indexed by the expiration timestamps.
-`Clock.timestamp` is the current mock timers timestamp that is advanced by `tick`.
+#### clock.tick( [n] )
+
+Advances mock timers time by `n` milliseconds (default 1).  Immediates and timeouts
+are run as they come due, immediates before timeouts.  0 milliseconds runs only the
+immediates.
+
+#### clock.immediates
+
+The array of immediate tasks that will execute on the next event loop `tick`.
+
+#### clock.timeouts
+
+A hash of array of timeouts indexed by the expiration timestamps.
+
+#### clock.timestamp
+
+The current mock timers timestamp that is advanced by `tick`.
 
 #### qmock.unmockTimers( )
 
