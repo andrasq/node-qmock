@@ -1,9 +1,8 @@
 qmock
 =====
 
-`qmock` is a light-weight test double library for easier testing of
-dependency injection style code.  Mocks are lacking in nodeunit; having
-used them in phpunit, I missed them.
+Light-weight test double library for easier testing of dependency injection style
+code.  Patterned somewhat after `phpunit`, which looks like `junit` I believe.
 
 `qmock.getMock(master)` returns a mock object that is instanceof `master`.
 The master can be a class (constructor function) or an existing object.
