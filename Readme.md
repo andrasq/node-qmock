@@ -126,12 +126,6 @@ A hash indexed by the expiration timestamp of arrays of timeouts.
 
 The current mock timers timestamp that is advanced by `tick`.
 
-#### qmock.unmockTimers( )
-
-Restore the global `setImmediate`, `setTimeout` etc functions to their inital
-original nodejs versions.  Can be called any time.  Note that any pending timeouts
-in the active mock timers will only trigger if strobed with `clock.tick()`.
-
 Example:
 
     var qmock = require('qmock');
@@ -149,6 +143,12 @@ Example:
     // => "timeout"
     clock.tick(0);
     // => "immediate"
+
+### qmock.unmockTimers( )
+
+Restore the global `setImmediate`, `setTimeout` etc functions to their inital
+original nodejs versions.  Can be called any time.  Note that any pending timeouts
+in the active mock timers will only trigger if strobed with `clock.tick()`.
 
 Mock Objects
 ------------
