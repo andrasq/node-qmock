@@ -1,7 +1,7 @@
 {
   "name": "qmock",
   "version": "0.0.10",
-  "description": "quick class and object mocking for unit tests",
+  "description": "quick class and object mocking, method stubbing and spying",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
