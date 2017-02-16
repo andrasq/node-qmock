@@ -15,30 +15,30 @@ to integrate them into nodeunit, but that's still rough.
 Installation
 ------------
 
-        npm install qmock
+    npm install qmock
 
 Example
 -------
 
-        QMock = require('qmock');
+    QMock = require('qmock');
 
-        // mock an existing object
-        var mock = QMock.getMock(console);
+    // mock an existing object
+    var mock = QMock.getMock(console);
 
-        // instrument log() and ensure that it is called with 'hello'
-        // full phpunit syntax should also work, ie
-        // mock.expects(QMock.twice()).method('log').with('hello');
-        mock.expects(2).method('log').with('hello');
-        mock.log('hello');
-        QMock.check(mock);      // assertion error, called 1 times, expected 2
+    // instrument log() and ensure that it is called with 'hello'
+    // full phpunit syntax should also work, ie
+    // mock.expects(QMock.twice()).method('log').with('hello');
+    mock.expects(2).method('log').with('hello');
+    mock.log('hello');
+    QMock.check(mock);      // assertion error, called 1 times, expected 2
 
-        // with() is sticky, all subsequent calls must also match
-        mock.log('world');      // assertion error, 'world' !== 'hello'
+    // with() is sticky, all subsequent calls must also match
+    mock.log('world');      // assertion error, 'world' !== 'hello'
 
-        // methods don't have to already exist.  create and call a stub method
-        // by specifying what it will return:
-        mock.expects(1).method('boom').will(QMock.throwError(new Error("BOOM!")));
-        mock.boom();            // error throw, BOOM!
+    // methods don't have to already exist.  create and call a stub method
+    // by specifying what it will return:
+    mock.expects(1).method('boom').will(QMock.throwError(new Error("BOOM!")));
+    mock.boom();            // error throw, BOOM!
 
 
 Api
@@ -103,16 +103,24 @@ time.  Returns a clock object.  To restore the timers back to what they were whe
 mockTimers was called, call `clock.uninstall()`.
 
 This function can be called any number of times, each call replaces the previous
-timers calls in effect with a new set.
+timers calls in effect with a new set.  Note that any pending immediates and timeouts
+in the system timers will still trigger, but with follow-up timeouts queued into the
+mock.
 
 Returns a `clock` with a method `tick( [n] )` that advances time by `n`
 milliseconds (default 1).  Immediates and timeouts are run as they come due,
 immediates before timeouts.  0 milliseconds runs only the immediates.
 
-#### qmock.restoreTimers( )
+`Clock` also has a few properties of interest, `immediates` which is the array of
+immediate tasks that will execute on the next event loop `tick`, and `timeouts` which
+is a hash of array of timeouts indexed by the expiration timestamps.
+`Clock.timestamp` is the current mock timers timestamp that is advanced by `tick`.
 
-Restore the original nodejs `setImmediate`, `setTimeout` etc functions no matter
-how many times they were overridden with `mockTimers`.
+#### qmock.unmockTimers( )
+
+Restore the global `setImmediate`, `setTimeout` etc functions to their inital
+original nodejs versions.  Can be called any time.  Note that any pending timeouts
+in the active mock timers will only trigger if strobed with `clock.tick()`.
 
 Example:
 
@@ -122,7 +130,7 @@ Example:
         console.log("timeout");
         setImmediate(function() {
             console.log("immediate");
-            qmock.restoreTimers();
+            qmock.unmockTimers();
         });
     }, 10);
     clock.tick(9);
