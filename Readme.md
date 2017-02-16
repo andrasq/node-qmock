@@ -146,8 +146,8 @@ Example:
 
 Replace the nodejs timers functions `setImmediate`, `clearImmediate`, `setTimeout`
 et al with mocked versions whose time is not linear and is not limited by real
-time.  Returns a clock object.  To restore the timers back to what they were when
-mockTimers was called, call `clock.uninstall()`.
+time.  Returns a clock object.  To restore the timers back to their original
+unmodified versions, use `qmock.unmockTimers()`.
 
 This function can be called any number of times, each call replaces the previous
 timers calls in effect with a new set.  Note that any pending immediates and timeouts
@@ -194,9 +194,9 @@ Example:
 
 ### qmock.unmockTimers( )
 
-Restore the global `setImmediate`, `setTimeout` etc functions to their inital
+Restore the global `setImmediate`, `setTimeout` etc functions back to their inital
 original nodejs versions.  Can be called any time.  Note that any pending timeouts
-in the active mock timers will only trigger if strobed with `clock.tick()`.
+in the active mock timers will trigger if strobed with `clock.tick()`.
 
 Mock Objects
 ------------
