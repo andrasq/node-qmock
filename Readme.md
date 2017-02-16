@@ -120,7 +120,7 @@ The array of immediate tasks that will execute on the next event loop `tick`.
 
 #### clock.timeouts
 
-A hash of array of timeouts indexed by the expiration timestamps.
+A hash indexed by the expiration timestamp of arrays of timeouts.
 
 #### clock.timestamp
 
