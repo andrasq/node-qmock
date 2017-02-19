@@ -1,5 +1,8 @@
-QMock = require('../index');
-assert = require('assert');
+'use strict';
+
+var QMock = require('../index');
+var qmock = QMock;
+var assert = require('assert');
 
 module.exports = {
     setUp: function(done) {
@@ -176,7 +179,7 @@ module.exports = {
                 for (i in scalars) {
                     var mock = QMock.getMock({}, ['m']);
                     mock.expects(1).method('m').will(QMock.returnValue(scalars[i]));
-                    ret = mock.m();
+                    var ret = mock.m();
                     t.equal(ret, scalars[i]);
                 }
                 t.done();
@@ -185,7 +188,7 @@ module.exports = {
             'should return function': function(t) {
                 var mock = QMock.getMock();
                 mock.expects(1).method('m').will(QMock.returnValue(function(){ return 1234; }));
-                ret = mock.m();
+                var ret = mock.m();
                 t.equal('function', typeof ret);
                 t.done();
             },
@@ -193,7 +196,7 @@ module.exports = {
             'should return computed value': function(t) {
                 var mock = QMock.getMock();
                 mock.expects(1).method('m').will(QMock.returnComputedValue(function(){ return 1234 }));
-                ret = mock.m();
+                var ret = mock.m();
                 t.equal(1234, ret);
                 t.done();
             },
@@ -334,6 +337,191 @@ module.exports = {
             tester.done.bind(t);
             QMock.extendWithMocks(tester, 'done');
             tester.done();
+        },
+    },
+
+    'stub': {
+        beforeEach: function(done) {
+            var self = this;
+            self.ncalls = 0;
+            self.obj = {
+                call: function() { self.ncalls += 1 ; return "abc123" }
+            };
+// FIXME: without done() will sometimes hang forever... but not always?
+            done();
+        },
+
+        'should spy without replacing': function(t) {
+            var stub = qmock.stub(this.obj, 'call');
+            this.obj.call(1, 2, 3, 4);
+            t.deepEqual(stub.callArguments, [1, 2, 3, 4]);
+            t.deepEqual(stub.callReturn, "abc123");
+            t.strictEqual(stub.callError, null);
+            t.done();
+        },
+
+        'should count calls': function(t) {
+            var stub = qmock.stub(this.obj, 'call');
+            t.equal(stub.callCount, 0);
+            this.obj.call();
+            t.equal(stub.callCount, 1);
+            this.obj.call();
+            t.equal(stub.callCount, 2);
+            this.obj.call();
+            t.equal(stub.callCount, 3);
+            t.done();
+        },
+
+        'should make available the call arguments and return value': function(t) {
+            var stub = qmock.stub(this.obj, 'call');
+            this.obj.call(1, 2, 3);
+            t.deepEqual(stub.callArguments, [1, 2, 3]);
+            t.equal(stub.callReturn, "abc123");
+            t.done();
+        },
+
+        'should record first N calls ': function(t) {
+            var stub = qmock.stub(this.obj, 'call', null, { saveLimit: 2 });
+            this.obj.call(1);
+            this.obj.call(2, 2);
+            this.obj.call(3, 3, 3);
+            t.equal(stub.callCount, 3);
+            t.deepEqual(stub.callArguments, [3, 3, 3]);
+            t.deepEqual(stub.callReturn, "abc123");
+            t.deepEqual(stub.getAllArguments(), [ [1], [2, 2] ]);
+            t.deepEqual(stub.getAllResults(), [ "abc123", "abc123" ]);
+// FIXME: normalize names: callReturn, getAllResults
+            t.done();
+        },
+
+        'should override method with my call and return stub with stats': function(t) {
+            var called = null;
+            var mycall;
+            var stub = qmock.stub(this.obj, 'call', mycall = function mycall(a, b) {
+                var args = [];
+                for (var i=0; i<arguments.length; i++) args[i] = arguments[i];
+                called = args;
+                return 123;
+            })
+            t.ok(stub);
+            t.equal(stub.callCount, 0);
+
+            this.obj.call(3, 7);
+            t.ok(!this.obj.ncalls, "did not override call");
+            t.equal(stub.callCount, 1);
+            t.deepEqual(stub.callArguments, [3, 7]);
+            t.equal(stub.callError, null);
+            t.equal(stub.callReturn, 123);
+            t.deepEqual(called, [3, 7]);
+            t.done();
+        },
+
+        'should restore override': function(t) {
+            var originalCall = this.obj.call;
+            var mycall;
+            var stub = qmock.stub(this.obj, 'call', function mycall() {});
+            t.assert(this.obj.call != originalCall);
+            stub.restore();
+            t.assert(this.obj.call == originalCall);
+            t.done();
+        },
+
+        'should restore added decoration': function(t) {
+            t.assert(this.obj.nocall === undefined);
+            var mycall;
+            var stub = qmock.stub(this.obj, 'nocall', mycall = function mycall() {});
+            t.equal(typeof this.obj.nocall, 'function');
+            stub.restore();
+            t.assert(this.obj.nocall === undefined);
+            t.done();
+        },
+
+        'should track thrown exceptions': function(t) {
+            var ncalls = 0;
+            var myError = new Error("deliberate error");
+            var stub = qmock.stub(this.obj, 'call', function mycall() {
+                if (++ncalls < 2) return 1;
+                throw myError;
+            }, { saveLimit: 2 })
+            this.obj.call(1);
+            try {
+                this.obj.call(7, 6, 5);
+                t.fail();
+            }
+            catch (err) {
+                t.equal(err, myError);
+                t.ok(stub.callError);
+                t.deepEqual(stub.callArguments, [7, 6, 5]);
+                t.equal(stub.callError, myError);
+                t.equal(stub.callReturn, null);
+                t.deepEqual(stub.getAllErrors(), [ null, myError ]);
+                t.deepEqual(stub.getAllArguments(), [ [1], [7, 6, 5] ]);
+                t.deepEqual(stub.getAllResults(), [ 1, null ]);
+                t.done();
+            }
+        },
+
+        'should trace callbacks': function(t) {
+            var stub = qmock.stub(this.obj, 'call', function mycall(a, b, cb) {
+                cb(null, b);
+                return 456;
+            })
+            t.expect(6);
+            this.obj.call(33, 77, function mycb(err, b) {
+                t.equal(stub.callCount, 1);
+                t.deepEqual(stub.callArguments.slice(0, 2), [33, 77]);
+                t.equal(typeof stub.callArguments[2], 'function');
+                t.deepEqual(stub.callError, null);
+                t.deepEqual(stub.callCallbackArguments, [null, 77]);
+            })
+            t.equal(stub.callReturn, 456);
+            t.done();
+        },
+
+        'should throw callback errors': function(t) {
+            var myError = new Error("callback error");
+            this.obj.call = function(cb) {
+                cb();
+            }
+            var stub = qmock.stub(this.obj, 'call', null, { saveLimit: 1 });
+            try {
+                this.obj.call(function callbackThatThrows() { throw myError })
+                t.fail("should have thrown");
+            }
+            catch (err) {
+                t.equal(err, myError);
+                t.equal(stub.callError, myError);
+                t.equal(stub.callCallbackError, myError);
+                t.done();
+            }
+        },
+
+        'spy should return a stub': function(t) {
+            var spy = qmock.spy(this.obj, 'call');
+            t.equal(spy._type, 'qmockStub');
+            t.done();
+        },
+
+        'spy should track up to 10 calls': function(t) {
+            var spy = qmock.spy(this.obj, 'call');
+            t.equal(spy.callCount, 0);
+            this.obj.call(1);
+            t.equal(spy.callCount, 1);
+            this.obj.call(2);
+            t.equal(spy.callCount, 2);
+            this.obj.call(3);
+            this.obj.call(4);
+            this.obj.call(5);
+            this.obj.call(6);
+            this.obj.call(7);
+            this.obj.call(8);
+            this.obj.call(9);
+            this.obj.call(10);
+            this.obj.call(11);
+            this.obj.call(12);
+            t.equal(spy.callCount, 12);
+            t.deepEqual(spy.getAllArguments(), [ [1], [2], [3], [4], [5], [6], [7], [8], [9], [10] ]);
+            t.done();
         },
     },
 };
