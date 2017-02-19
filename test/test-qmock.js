@@ -1,7 +1,13 @@
+/**
+ * Copyright (C) 2017 Andras Radics
+ * Licensed under the Apache License, Version 2.0
+ */
+
 'use strict';
 
-var QMock = require('../index');
+var QMock = require('../');
 var qmock = QMock;
+var MockTimers = require('../lib/mockTimers').MockTimers;
 var assert = require('assert');
 
 module.exports = {
@@ -522,6 +528,156 @@ module.exports = {
             t.equal(spy.callCount, 12);
             t.deepEqual(spy.getAllArguments(), [ [1], [2], [3], [4], [5], [6], [7], [8], [9], [10] ]);
             t.done();
+        },
+    },
+
+    'mockTimers': {
+        before: function(done) {
+            this.originals = {
+                setImmediate: setImmediate, setTimeout: setTimeout, setInterval: setInterval,
+                clearImmediate: clearImmediate, clearTimeout: clearTimeout, clearInterval: clearInterval,
+            };
+            done();
+        },
+
+        afterEach: function(done) {
+            qmock.unmockTimers();
+            done();
+        },
+
+        'should restore timers': function(t) {
+            for (var k in this.originals) global[k] = undefined;
+            t.assert(!setImmediate);
+            t.assert(!setTimeout);
+            qmock.unmockTimers();
+            for (var k in this.originals) t.assert(global[k] == this.originals[k]);
+            t.done();
+        },
+
+        'should override timers': function(t) {
+            qmock.mockTimers();
+            t.assert(setImmediate && setImmediate != this.originals.setImmediate);
+            t.assert(setTimeout && setTimeout != this.originals.setTimeout);
+            for (var k in this.originals) t.assert(global[k] != this.originals[k]);
+            t.done();
+        },
+
+        'should create a MockTimers object': function(t) {
+            var clock = qmock.mockTimers();
+            t.assert(clock instanceof MockTimers);
+            t.done();
+        },
+
+        'should queue immediates': function(t) {
+            var clock = qmock.mockTimers();
+            var fn1 = function(){};
+            var fn2 = function(){};
+            clock.setImmediate(fn1);
+            clock.setImmediate(fn2);
+            t.equal(clock.immediates.length, 2);
+            t.contains(clock.immediates[0], fn1);
+            t.contains(clock.immediates[1], fn2);
+            t.done();
+        },
+
+        'should queue timeouts': function(t) {
+            var clock = qmock.mockTimers();
+            var fn1 = function(){};
+            var fn2 = function(){};
+            clock.setTimeout(fn1, 1);
+            clock.setTimeout(fn2, 2);
+            var timeouts = Object.keys(clock.timeouts);
+            t.equals(timeouts.length, 2);
+            t.contains(clock.timeouts[timeouts[0]][0], fn1);
+            t.contains(clock.timeouts[timeouts[1]][0], fn2);
+            t.done();
+        },
+
+        'tick': {
+            'should advance the timestamp': function(t) {
+                var clock = qmock.mockTimers();
+                t.equal(clock.timestamp, 0);
+                clock.tick();
+                t.equal(clock.timestamp, 1);
+                clock.tick(0);
+                clock.tick(0);
+                t.equal(clock.timestamp, 1);
+                clock.tick(3);
+                t.equal(clock.timestamp, 4);
+                t.done();
+            },
+
+            'should run pending immediates': function(t) {
+                var clock = qmock.mockTimers();
+                var calls = [];
+                clock.setImmediate(function(){ calls.push(1); setImmediate(function(){ calls.push(3) }) });
+                clock.setImmediate(function(){ calls.push(2) });
+                // first tick should run the 2 pending immediates
+                clock.tick();
+                t.deepEqual(calls, [1, 2]);
+                // next tick should run the subsequently queued immediates
+                clock.tick();
+                t.deepEqual(calls, [1, 2, 3]);
+                t.done();
+            },
+
+            'should run pending timeouts': function(t) {
+                var clock = qmock.mockTimers();
+                var calls = [];
+                clock.setTimeout(function(){ calls.push(2) }, 2);   // trigger at 2 = 0+2
+                clock.setTimeout(function(){ calls.push(5) }, 5);   // trigger at 5 = 0+5
+                t.deepEqual(calls, []);
+                clock.tick();  // 1
+                t.deepEqual(calls, []);
+                clock.tick();  // 2
+                t.deepEqual(calls, [2]);
+                clock.tick();  // 3
+                clock.setTimeout(function(){ calls.push(6) }, 3);   // trigger at 6 = 3+3
+                t.deepEqual(calls, [2]);
+                clock.tick();  // 4
+                t.deepEqual(calls, [2]);
+                clock.tick();  // 5
+                t.deepEqual(calls, [2, 5]);
+                clock.tick();  // 6
+                t.deepEqual(calls, [2, 5, 6]);
+                t.done();
+            },
+
+            'should not run timeout before it triggers': function(t) {
+                var clock = qmock.mockTimers();
+                var calls = [];
+                clock.setTimeout(function(){ calls.push(1000) }, 1000);
+                clock.tick(990);
+                for (var i=0; i<9; i++) clock.tick();
+                t.deepEqual(calls, []);
+                clock.tick(1);
+                t.deepEqual(calls, [1000]);
+                t.done();
+            },
+
+            'should run all timeouts that have come due': function(t) {
+                var calls = [];
+                var clock = qmock.mockTimers();
+                clock.setTimeout(function(){ calls.push(2) }, 2);
+                clock.setTimeout(function(){ calls.push(22) }, 22);
+                clock.setTimeout(function(){ calls.push(202) }, 202);
+                clock.setTimeout(function(){ calls.push(20002) }, 20002);
+                clock.tick(50000);
+                t.deepEqual(calls, [2, 22, 202, 20002]);
+                t.done();
+            },
+
+            'should make timeout time pass quickly': function(t) {
+                var calls = [];
+                var clock = qmock.mockTimers();
+                clock.setTimeout(function(){ calls.push(10000) }, 10000);
+                var t1 = Date.now();
+                clock.tick(10000);
+                var t2 = Date.now();
+                t.deepEqual(calls, [10000]);
+                t.assert(t2 - t1 < 10);
+                t.done();
+            },
         },
     },
 };
