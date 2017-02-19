@@ -301,34 +301,39 @@ module.exports = {
 
     'nodeunit': {
         'should extend nodeunit tester with mocks': function(t) {
-            if (t.getMock) t.skip();
-            QMock.extendWithMocks(t, 'done');
-            var mock = t.getMock({});
+            var tester = {};
+            QMock.extendWithMocks(tester, 'done');
+            var mock = tester.getMock({});
             mock.method('m').willReturn('proper and correct return value');
             t.equal(mock.m(), 'proper and correct return value');
             t.done();
         },
 
         'should assert that expecteds were fulfilled': function(t) {
-            if (t.getMock) t.skip();
-            QMock.extendWithMocks(t, 'done');
-            var mock = t.getMock({}, ['m']);
+            var called = false;
+            var tester = {};
+            tester.done = function() { called = true };
+            QMock.extendWithMocks(tester, 'done');
+            var mock = tester.getMock({}, ['m']);
             mock.expects(QMock.twice()).method('m');
             try {
-                t.done();
+                tester.done();
                 t.ok(false, "method not called, assertion should throw error");
             }
             catch (err) {
                 t.ok(err.toString().indexOf("called 0 times, expected 2") > 0);
                 t.ok(true);
-                // t.done() is true, assertion error was thrown after test shut down
+                t.ok(called);
+                t.done();
             }
         },
 
         'should not be affected by preceding expecteds': function(t) {
-            if (t.getMock) t.skip();
-            QMock.extendWithMocks(t, 'done');
-            t.done();
+            var tester = {};
+            tester.done = t.done;
+            tester.done.bind(t);
+            QMock.extendWithMocks(tester, 'done');
+            tester.done();
         },
     },
 };
