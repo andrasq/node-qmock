@@ -108,6 +108,13 @@ successful call following a call that threw replaces the error with `null`.
 Like `stub.callError`, but `error` is sticky, and contains the last error thrown by
 any call to the stub.
 
+#### stub.callCallbackArguments
+
+If the last argument passed to a stub is a function, it will be assumed to be the
+callback.  A copy of the arguments passed to the callback will be be in
+`callCallbackArguments`.  Note:  callbacks are not synchronized with calls to the
+stub, so the callback arguments may not be from the most recent call.
+
 ### qmock.spy( object, methodName )
 
 A spy is a stub that monitors calls to the named method.
