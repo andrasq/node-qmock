@@ -93,10 +93,9 @@ Number of calls made to the stub.
 
 Array with the arguments from the last call to the stub.
 
-#### stub.callReturn
+#### stub.callResult
 
 Last value returned from the stub function, `undefined` if it threw an `Error`.
-Values returned to callback functions are not tracked.
 
 #### stub.callError
 

@@ -363,6 +363,7 @@ module.exports = {
             this.obj.call(1, 2, 3, 4);
             t.deepEqual(stub.callArguments, [1, 2, 3, 4]);
             t.deepEqual(stub.callReturn, "abc123");
+            t.deepEqual(stub.callResult, "abc123");
             t.strictEqual(stub.callError, null);
             t.done();
         },
@@ -384,6 +385,7 @@ module.exports = {
             this.obj.call(1, 2, 3);
             t.deepEqual(stub.callArguments, [1, 2, 3]);
             t.equal(stub.callReturn, "abc123");
+            t.equal(stub.callResult, "abc123");
             t.done();
         },
 
@@ -395,9 +397,9 @@ module.exports = {
             t.equal(stub.callCount, 3);
             t.deepEqual(stub.callArguments, [3, 3, 3]);
             t.deepEqual(stub.callReturn, "abc123");
+            t.deepEqual(stub.callResult, "abc123");
             t.deepEqual(stub.getAllArguments(), [ [1], [2, 2] ]);
             t.deepEqual(stub.getAllResults(), [ "abc123", "abc123" ]);
-// FIXME: normalize names: callReturn, getAllResults
             t.done();
         },
 
@@ -419,6 +421,7 @@ module.exports = {
             t.deepEqual(stub.callArguments, [3, 7]);
             t.equal(stub.callError, null);
             t.equal(stub.callReturn, 123);
+            t.equal(stub.callResult, 123);
             t.deepEqual(called, [3, 7]);
             t.done();
         },
@@ -461,6 +464,7 @@ module.exports = {
                 t.deepEqual(stub.callArguments, [7, 6, 5]);
                 t.equal(stub.callError, myError);
                 t.equal(stub.callReturn, null);
+                t.equal(stub.callResult, null);
                 t.deepEqual(stub.getAllErrors(), [ null, myError ]);
                 t.deepEqual(stub.getAllArguments(), [ [1], [7, 6, 5] ]);
                 t.deepEqual(stub.getAllResults(), [ 1, null ]);
@@ -473,7 +477,7 @@ module.exports = {
                 cb(null, b);
                 return 456;
             }, { saveLimit: 2 })
-            t.expect(7);
+            t.expect(8);
             this.obj.call(33, 77, function mycb(err, b) {
                 t.equal(stub.callCount, 1);
                 t.deepEqual(stub.callArguments.slice(0, 2), [33, 77]);
@@ -483,6 +487,7 @@ module.exports = {
                 t.deepEqual(stub.getAllCallbackArguments(), [ [null, 77] ]);
             })
             t.equal(stub.callReturn, 456);
+            t.equal(stub.callResult, 456);
             t.done();
         },
 
