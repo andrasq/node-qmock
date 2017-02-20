@@ -121,20 +121,27 @@ A spy is a stub that monitors calls to the named method.
 It is similar to calling `stub` without a `userFunction`, but records
 all call arguments and returned results or errors.
 
-Returns a `stub` like above:
+Returns a `stub` like above, plus:
 
-#### stub.getAllArguments
+#### stub.getAllArguments( )
 
 Return the array of argument vectors passed to the first 10 calls to this stub.
 
-#### stub.getAllResults
+#### stub.getAllResults( )
 
 Return the array of values returned by the first 10 calls to the stub function.
 
-#### stub.getAllErrors
+#### stub.getAllErrors( )
 
 Return the array of errors thrown by the first 10 calls to the stub function.  If
 no error was thrown by a call, the array contains a `null` entry for it.
+
+#### stub.getAllCallbackArguments( )
+
+Return the argument vectors passed to the stub callback.  The callback is a final
+function in the stub arguments list.  Note that callbacks may be called out of
+order, so the returned argument may not match 1-to-1 the stub arguments passed
+in `getAllArguments`.
 
 Example:
 

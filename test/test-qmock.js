@@ -472,14 +472,15 @@ module.exports = {
             var stub = qmock.stub(this.obj, 'call', function mycall(a, b, cb) {
                 cb(null, b);
                 return 456;
-            })
-            t.expect(6);
+            }, { saveLimit: 2 })
+            t.expect(7);
             this.obj.call(33, 77, function mycb(err, b) {
                 t.equal(stub.callCount, 1);
                 t.deepEqual(stub.callArguments.slice(0, 2), [33, 77]);
                 t.equal(typeof stub.callArguments[2], 'function');
                 t.deepEqual(stub.callError, null);
                 t.deepEqual(stub.callCallbackArguments, [null, 77]);
+                t.deepEqual(stub.getAllCallbackArguments(), [ [null, 77] ]);
             })
             t.equal(stub.callReturn, 456);
             t.done();
@@ -684,7 +685,7 @@ module.exports = {
                 clock.tick(10000);
                 var t2 = Date.now();
                 t.deepEqual(calls, [10000]);
-                t.assert(t2 - t1 < 10);
+                t.assert(t2 - t1 < 100);
                 t.done();
             },
         },
