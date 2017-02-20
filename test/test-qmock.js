@@ -7,7 +7,8 @@
 
 var QMock = require('../');
 var qmock = QMock;
-var MockTimers = require('../lib/mockTimers').MockTimers;
+var mockTimers = require('../lib/mockTimers');
+var MockTimers = mockTimers.MockTimers;
 var assert = require('assert');
 
 module.exports = {
@@ -554,7 +555,16 @@ module.exports = {
             t.done();
         },
 
-        'should override timers': function(t) {
+        'should overrideTimers and unmockTimers': function(t) {
+            var clock = new MockTimers();
+            mockTimers.overrideTimers(clock);
+            for (var k in this.originals) t.equals(clock[k], global[k]);
+            mockTimers.unmockTimers();
+            for (var k in this.originals) t.equals(this.originals[k], global[k]);
+            t.done();
+        },
+
+        'should mockTimers': function(t) {
             qmock.mockTimers();
             t.assert(setImmediate && setImmediate != this.originals.setImmediate);
             t.assert(setTimeout && setTimeout != this.originals.setTimeout);
@@ -580,16 +590,15 @@ module.exports = {
             t.done();
         },
 
-        'should queue timeouts': function(t) {
+        'should queue timeouts for clock timestamp': function(t) {
             var clock = qmock.mockTimers();
+            clock.timestamp = 1000;
             var fn1 = function(){};
             var fn2 = function(){};
             clock.setTimeout(fn1, 1);
             clock.setTimeout(fn2, 2);
-            var timeouts = Object.keys(clock.timeouts);
-            t.equals(timeouts.length, 2);
-            t.contains(clock.timeouts[timeouts[0]][0], fn1);
-            t.contains(clock.timeouts[timeouts[1]][0], fn2);
+            t.contains(clock.timeouts[1001][0], fn1);
+            t.contains(clock.timeouts[1002][0], fn2);
             t.done();
         },
 
@@ -764,8 +773,8 @@ module.exports = {
             'should setTimeout in clock': function(t) {
                 var fn1 = function(){};
                 setTimeout(fn1, 1);
-                t.equal(Object.keys(this.clock.timeouts).length, 1);
-                t.contains(this.clock.timeouts[Object.keys(this.clock.timeouts)[0]][0], fn1);
+                t.equal(this.clock.timeouts[1].length, 1);
+                t.contains(this.clock.timeouts[1][0], fn1);
                 t.done();
             },
 
@@ -775,6 +784,13 @@ module.exports = {
                 clearTimeout(task);
                 this.clock.tick(2);
                 t.ok(!called);
+                t.done();
+            },
+
+            'should default to 1 ms': function(t) {
+                this.clock.setTimeout(function(){});
+                this.clock.setTimeout(function(){}, 0);
+                t.equal(this.clock.timeouts[1].length, 2);
                 t.done();
             },
 
@@ -803,7 +819,14 @@ module.exports = {
 
             'should setInterval in clock': function(t) {
                 setInterval(function(){}, 1);
-                t.equal(Object.keys(this.clock.timeouts).length, 1);
+                t.equal(this.clock.timeouts[1].length, 1);
+                t.done();
+            },
+
+            'should default to 1 ms': function(t) {
+                this.clock.setInterval(function(){});
+                this.clock.setInterval(function(){}, 0);
+                t.equal(this.clock.timeouts[1].length, 2);
                 t.done();
             },
 
