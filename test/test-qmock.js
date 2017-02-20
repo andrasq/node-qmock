@@ -679,5 +679,178 @@ module.exports = {
                 t.done();
             },
         },
+
+        'should pass arguments to setImmediate': function(t) {
+            var clock = qmock.mockTimers();
+            clock.setImmediate(function(a, b) {
+                t.equal(a, 1);
+                t.equal(b, 2);
+                t.equal(arguments.length, 2);
+                t.done();
+            }, 1, 2)
+            clock.tick();
+        },
+
+        'should pass arguments to setTimeout': function(t) {
+            var clock = qmock.mockTimers();
+            clock.setTimeout(function(a, b) {
+                t.equal(a, 1);
+                t.equal(b, 2);
+                t.equal(arguments.length, 2);
+                t.done();
+            }, 10, 1, 2)
+            clock.tick(10);
+        },
+
+        'should pass arguments to setInterval': function(t) {
+            var clock = qmock.mockTimers();
+            clock.setInterval(function(a, b) {
+                t.equal(a, 1);
+                t.equal(b, 2);
+                t.equal(arguments.length, 2);
+                t.done();
+            }, 10, 1, 2)
+            clock.tick(10);
+        },
+
+        'setImmediate': {
+            beforeEach: function(done) {
+                this.clock = qmock.mockTimers();
+                done();
+            },
+
+            'should setImmediate in clock': function(t) {
+                var fn1 = function(){};
+                setImmediate(fn1);
+                t.equal(this.clock.immediates.length, 1);
+                t.contains(this.clock.immediates[0], fn1);
+                t.done();
+            },
+
+            'should clearImmediate': function(t) {
+                if (!setImmediate) t.skip();
+                var called = false;
+                var task = setImmediate(function(){ called = true });
+                clearImmediate(task);
+                this.clock.tick(2);
+                t.ok(!called);
+                t.done();
+            },
+
+            'errors should throw but let next immediate run': function(t) {
+                var self = this;
+                t.expect(1);
+                var called = false;
+                try {
+                    setImmediate(function immediate1(){ throw new Error("test error") });
+                    setImmediate(function immediate2(){ called = true });
+                    self.clock.tick();
+                    t.fail();
+                } catch (err) {
+                    process.nextTick(function() {
+                        t.ok(called);
+                        t.done();
+                    })
+                }
+            },
+        },
+        
+        'setTimeout': {
+            beforeEach: function(done) {
+                this.clock = qmock.mockTimers();
+                done();
+            },
+
+            'should setTimeout in clock': function(t) {
+                var fn1 = function(){};
+                setTimeout(fn1, 1);
+                t.equal(Object.keys(this.clock.timeouts).length, 1);
+                t.contains(this.clock.timeouts[Object.keys(this.clock.timeouts)[0]][0], fn1);
+                t.done();
+            },
+
+            'should clearTimeout': function(t) {
+                var called = false;
+                var task = setTimeout(function(){ called = true }, 1);
+                clearTimeout(task);
+                this.clock.tick(2);
+                t.ok(!called);
+                t.done();
+            },
+
+            'errors should throw but let next task run': function(t) {
+                var self = this;
+                t.expect(1);
+                var called = false;
+                try {
+                    setTimeout(function timeout1(){ throw new Error("test error") }, 1);
+                    setTimeout(function timeout2(){ called = true }, 1);
+                    self.clock.tick();
+                } catch (err) {
+                    process.nextTick(function() {
+                        t.ok(called);
+                        t.done();
+                    })
+                }
+            },
+        },
+
+        'setInterval': {
+            beforeEach: function(done) {
+                this.clock = qmock.mockTimers();
+                done();
+            },
+
+            'should setInterval in clock': function(t) {
+                setInterval(function(){}, 1);
+                t.equal(Object.keys(this.clock.timeouts).length, 1);
+                t.done();
+            },
+
+            'should make repeated calls': function(t) {
+                var clock = this.clock;
+                var calls = [];
+                setInterval(function() { calls.push(clock.timestamp) }, 3);
+                clock.tick(2);
+                t.equal(calls.length, 0);
+                clock.tick(1);
+                t.equal(calls.length, 1);
+                clock.tick(2);
+                t.equal(calls.length, 1);
+                clock.tick(1);
+                t.equal(calls.length, 2);
+                clock.tick(9);
+                t.equal(calls.length, 5);
+                t.done();
+            },
+
+            'should clearInterval': function(t) {
+                var clock = this.clock;
+                var calls = [];
+                var task = setInterval(function() { calls.push(clock.timestamp) }, 3);
+                clock.tick(3);
+                t.equal(calls.length, 1);
+                clock.clearInterval(task);
+                clock.tick(3);
+                t.equal(calls.length, 1);
+                t.done();
+            },
+
+            'errors should throw but let the next task run': function(t) {
+                var self = this;
+                t.expect(1);
+                var called = false;
+                try {
+                    setInterval(function interval1(){ throw new Error("test error") }, 1);
+                    setInterval(function interval2(){ called = true }, 1);
+                    self.clock.tick();
+                } catch (err) {
+                    process.nextTick(function() {
+                        t.ok(called);
+                        t.done();
+                    })
+                }
+            },
+        },
     },
 };
