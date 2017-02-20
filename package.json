@@ -16,7 +16,7 @@
     "node": ">=0.0.0"
   },
   "scripts": {
-    "test": "nodeunit",
+    "test": "qnit -b",
     "coverage": "nyc --version && nyc --reporter text --reporter lcov nodeunit test || echo nyc not installed"
   },
   "keywords": [
