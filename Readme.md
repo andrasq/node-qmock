@@ -4,6 +4,8 @@ qmock
 Light-weight test double library for easier testing of dependency injection style
 code.  Patterned somewhat after `phpunit`, which looks like `junit` I believe.
 
+Can stub, spy, and mock classes, objects, and the system timers.
+
 `qmock.getMock(master)` returns a mock object that is instanceof `master`.
 The master can be a class (constructor function) or an existing object.
 The mock is a fully functional object, with some methods possibly stubbed out.
@@ -32,7 +34,8 @@ Example
     qmock.check(mock);      // assertion error, called 1 times, expected 2
 
     // with() is sticky, all subsequent calls must also match
-    mock.log('world');      // assertion error, 'world' !== 'hello'
+    mock.log('world');
+    qmock.check(mock);     // assertion error, 'world' !== 'hello'
 
     // methods don't have to already exist.  create and call a stub method
     // by specifying what it will return:
