@@ -31,7 +31,7 @@
     "unittest"
   ],
   "dependencies": {
-    "mongoid-js": "1"
+    "mongoid-js": "1.1.0"
   },
   "devDependencies": {
     "nodeunit": "0.9.0"
