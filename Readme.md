@@ -94,7 +94,7 @@ Number of calls made to the stub.
 
 #### stub.callArguments
 
-Array with the arguments from the last call to the stub.  Also available as `stub.args`.
+Array with the arguments from the last call to the stub.
 
 #### stub.callResult
 
@@ -268,7 +268,7 @@ Mock Objects
 Change Log
 ----------
 
-- 0.2.0 - also track stub callbacks, anonymous `spy` functions, gtest with qnit
+- 0.2.0 - also track stub callbacks, anonymous `spy` functions, test with qnit
 - 0.1.0 - `stub()` and `mockTimers()`, initial `spy()`
 - 0.0.8 - Jan 2015 version
 
