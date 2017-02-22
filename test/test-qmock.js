@@ -398,6 +398,7 @@ module.exports = {
             t.deepEqual(stub.callArguments, [3, 3, 3]);
             t.deepEqual(stub.callReturn, "abc123");
             t.deepEqual(stub.callResult, "abc123");
+            t.deepEqual(stub.args, [ [1], [2, 2] ]);
             t.deepEqual(stub.getAllArguments(), [ [1], [2, 2] ]);
             t.deepEqual(stub.getAllResults(), [ "abc123", "abc123" ]);
             t.done();
@@ -512,6 +513,38 @@ module.exports = {
         'spy should return a stub': function(t) {
             var spy = qmock.spy(this.obj, 'call');
             t.equal(spy._type, 'qmockStub');
+            t.done();
+        },
+
+        'spy should create anonymous function stub': function(t) {
+            var spy = qmock.spy();
+            t.equal(typeof spy, 'function');
+            spy(1);
+            spy(2, 3);
+            t.equal(spy.stub.callCount, 2);
+            t.deepEqual(spy.stub.args, [[1], [2,3]]);
+            t.done();
+        },
+
+        'spy function should access `this`': function(t) {
+            var object = { a: 123 };
+            object.spy = qmock.spy(function(n) { return n * this.a });
+            t.equal(object.spy(3), 369);
+            t.done();
+        },
+
+        'spy of method should allow restore': function(t) {
+            var fn = function() {};
+            var object = { method: fn };
+            var ncalls = 0;
+            qmock.spy(object, 'method', function() {
+                ncalls += 1;
+            });
+            object.method();
+            object.method.restore();
+            object.method();
+            t.equal(ncalls, 1);
+            t.equal(object.method, fn);
             t.done();
         },
 

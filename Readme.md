@@ -72,14 +72,14 @@ will be completely un-initialized.
 
 If master is an existing object, this call is identical to `getMock`.
 
-### qmock.stub( object, methodName [,userFunction] )
+### qmock.stub( object, methodName [,overrideFunction] )
 
-Replace the named method of `object` with the user function, and return a stub that
-will contain information about calls to the method.  This can be used to override
-or rewrite method calls.
+Replace the named method of `object` with the override function, and return a stub
+object that holds information about calls to the method.  This form can be used to
+override or rewrite method calls.
 
-If a user function is not specified, the original method is used.  This form is
-useful for passive "spying" on method calls.
+If an override function is not specified, the original method is called.  This form is
+useful to passively "spy" on method calls.
 
 Returns a `stub` object:
 
@@ -94,7 +94,7 @@ Number of calls made to the stub.
 
 #### stub.callArguments
 
-Array with the arguments from the last call to the stub.
+Array with the arguments from the last call to the stub.  Also available as `stub.args`.
 
 #### stub.callResult
 
@@ -117,46 +117,93 @@ callback.  A copy of the arguments passed to the callback will be be in
 `callCallbackArguments`.  Note:  callbacks are not synchronized with calls to the
 stub, so the callback arguments may not be from the most recent call.
 
-### qmock.spy( object, methodName )
-
-A spy is a stub that monitors calls to the named method.
-It is similar to calling `stub` without a `userFunction`, but records
-all call arguments and returned results or errors.
-
-Returns a `stub` like above, plus:
-
-#### stub.getAllArguments( )
-
-Return the array of argument vectors passed to the first 10 calls to this stub.
-
-#### stub.getAllResults( )
-
-Return the array of values returned by the first 10 calls to the stub function.
-
-#### stub.getAllErrors( )
-
-Return the array of errors thrown by the first 10 calls to the stub function.  If
-no error was thrown by a call, the array contains a `null` entry for it.
-
-#### stub.getAllCallbackArguments( )
-
-Return the argument vectors passed to the stub callback.  The callback is a final
-function in the stub arguments list.  Note that callbacks may be called out of
-order, so the returned argument may not match 1-to-1 the stub arguments passed
-in `getAllArguments`.
-
 Example:
 
     var qmock = require('qmock');
     var assert = require('assert');
+
     var stub = qmock.stub(process, 'exit', function(){});
-    process.exit();
-    process.exit();
-    console.log("still here");
-    assert(stub.callCount == 2);
+    process.exit(1);
+    process.exit(2, 3);
+    console.log("did not exit");
+    // => did not exit
+
+    assert.equal(stub.callCount, 2);
+    assert.deepEqual(stub.callArguments, [2, 3]);
+
     stub.restore();
     process.exit();
+    // process exited, program stopped
+
     console.log("this line will not appear");
+    // no output, line not reached
+
+### qmock.spy( [func] )
+
+Spy on calls to the given function.  Returns an instrumented function that tracks
+calls to `func`.  If no func is given, an anonymous function is created to be spied
+on, which can then be passed as eg a callback.  Returns the spy function.  The stats
+are accessible in the property `spy.stub`.
+
+Example
+
+    var qmock = require('qmock');
+    var originalWrite = process.stderr.write;
+    process.stderr.write = qmock.spy(function(str, cb) {
+        console.log("would have written %d bytes", str.length);
+        if (cb) cb();
+    });
+    process.stderr.write("test message\n");
+    // => would have written 13 bytes
+
+    process.stderr.write = originalWrite;
+    process.stderr.write("another message\n");
+    // => another message
+
+### qmock.spy( object, methodName [,override] )
+
+Spy on calls to the named method of the object.  If the `override` function is given,
+the method will be replaced with the override.  Returns a `methodStub` object that
+holds stats about the calls made.  The object method can be restored to the original
+with `methodStub.restore()`.
+
+The returned `methodStub` contains the call stats like with `qmock.stub()`, with
+additional methods:
+
+Example
+
+    var qmock = require('./');
+    var stub = qmock.spy(process.stderr, 'write', function(str, cb) {
+        console.log("would have written %d bytes", str.length);
+        if (cb) cb();
+    });
+    process.stderr.write("test message\n");
+    // => would have written 13 bytes
+
+    stub.restore();
+    process.stderr.write("another message\n");
+    // => another message
+
+#### stub.getAllArguments( )
+
+Return the argument vectors passed to the first 10 calls of the spied function.
+For convenience, this information is also available in the `stub.args` array.
+
+#### stub.getAllResults( )
+
+Return the values returned by the first 10 calls to the spied function.
+
+#### stub.getAllErrors( )
+
+Return the errors thrown by the first 10 calls to the spied function.  If no error
+was thrown by a call, the array contains a `null` entry for it.
+
+#### stub.getAllCallbackArguments( )
+
+Return the argument vectors passed to the stub callback.  The callback is recognized
+as a function passed as the last value in the stub arguments list.  Note that
+callbacks may be called out of order, so the returned argument may not match 1-to-1
+the stub arguments passed in `getAllArguments`.
 
 ### qmock.mockTimers( )
 
@@ -218,6 +265,12 @@ Mock Objects
 ------------
 
 
+Change Log
+----------
+
+- 0.2.0 - also track stub callbacks, anonymous `spy` functions, gtest with qnit
+- 0.1.0 - `stub()` and `mockTimers()`, initial `spy()`
+- 0.0.8 - Jan 2015 version
 
 Todo
 ----
