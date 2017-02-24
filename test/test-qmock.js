@@ -590,7 +590,6 @@ module.exports = {
         },
 
         'should export functions': function(t) {
-            var mockTimers = require('../lib/mockTimers');
             t.equal(mockTimers.mockTimers, qmock.mockTimers);
             t.equal(mockTimers.unmockTimers, qmock.unmockTimers);
             t.done();
@@ -933,7 +932,6 @@ module.exports = {
         },
 
         'should export functions': function(t) {
-            var mockHttp = require('../lib/mockHttp');
             t.equal(qmock.mockHttp, mockHttp.mockHttp);
             t.equal(qmock.unmockHttp, mockHttp.unmockHttp);
             t.equal(qmock.mockHttps, mockHttp.mockHttps);
@@ -955,7 +953,7 @@ module.exports = {
         'request should return instance of ClientRequest': function(t) {
             qmock.mockHttp(function(){})
             var req = http.request();
-            t.ok(req instanceof require('http').ClientRequest);
+            t.ok(req instanceof http.ClientRequest);
             t.done();
         },
 
@@ -1013,10 +1011,10 @@ module.exports = {
                 setTimeout(function(){ ++resCount; req.emit('mockResponse') }, 2);
             });
             http.request({}, function(res) {
-                t.ok(res instanceof require('http').IncomingMessage);
+                t.ok(res instanceof http.IncomingMessage);
                 t.equal(resCount, 1);
                 https.request({}, function(res) {
-                    t.ok(res instanceof require('http').IncomingMessage);
+                    t.ok(res instanceof http.IncomingMessage);
                     t.equal(resCount, 2);
                     t.done();
                 })
