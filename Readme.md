@@ -81,12 +81,8 @@ override or rewrite method calls.
 If an override function is not specified, the original method is called.  This form is
 useful to passively "spy" on method calls.
 
-Returns a `stub` object:
-
-#### stub.restore( )
-
-Remove the stub and restore the original method back onto the object.
-
+Returns a `stub` object that is updated with information about the last call's
+arguments, return value, exception thrown, and callback arguments:
 
 #### stub.callCount
 
@@ -116,6 +112,10 @@ If the last argument passed to a stub is a function, it will be assumed to be th
 callback.  A copy of the arguments passed to the callback will be be in
 `callCallbackArguments`.  Note:  callbacks are not synchronized with calls to the
 stub, so the callback arguments may not be from the most recent call.
+
+#### stub.restore( )
+
+Remove the stub and restore the original method back onto the object.
 
 Example:
 
@@ -163,26 +163,12 @@ Example
 ### qmock.spy( object, methodName [,override] )
 
 Spy on calls to the named method of the object.  If the `override` function is given,
-the method will be replaced with the override.  Returns a `methodStub` object that
-holds stats about the calls made.  The object method can be restored to the original
-with `methodStub.restore()`.
+the method will be replaced with the override.  Returns a `stub` object that holds
+information about the calls made.  The object method can be restored to the original
+with `stub.restore()`.
 
-The returned `methodStub` contains the call stats like with `qmock.stub()`, with
-additional methods:
-
-Example
-
-    var qmock = require('./');
-    var stub = qmock.spy(process.stderr, 'write', function(str, cb) {
-        console.log("would have written %d bytes", str.length);
-        if (cb) cb();
-    });
-    process.stderr.write("test message\n");
-    // => would have written 13 bytes
-
-    stub.restore();
-    process.stderr.write("another message\n");
-    // => another message
+The returned `stub` contains the call stats like with `qmock.stub()`, with additional
+methods:
 
 #### stub.getAllArguments( )
 
@@ -204,6 +190,20 @@ Return the argument vectors passed to the stub callback.  The callback is recogn
 as a function passed as the last value in the stub arguments list.  Note that
 callbacks may be called out of order, so the returned argument may not match 1-to-1
 the stub arguments passed in `getAllArguments`.
+
+Example
+
+    var qmock = require('./');
+    var stub = qmock.spy(process.stderr, 'write', function(str, cb) {
+        console.log("would have written %d bytes", str.length);
+        if (cb) cb();
+    });
+    process.stderr.write("test message\n");
+    // => would have written 13 bytes
+
+    stub.restore();
+    process.stderr.write("another message\n");
+    // => another message
 
 ### qmock.mockTimers( )
 
