@@ -261,6 +261,41 @@ Restore the global `setImmediate`, `setTimeout` etc functions back to their init
 original nodejs versions.  Can be called any time.  Note that any pending timeouts
 in the active mock timers will trigger if strobed with `clock.tick()`.
 
+### qmock.mockHttp( handler(req, res) )
+
+Override `http.request` and `https.request` to redirect all web requests to the
+provided handler.  Each new request will make a call to `handler`.  Request and
+response behavior and emulation is up to the handler.  The handler is invoked
+immediately after the caller receives the `req` return object.  This function can
+be called at any time, each replaces the previous override.  Restore the default
+system request functionality with `unmockHttp`.
+
+The callback is passed the handler-supplied or the mock-created `res` as soon as
+the `mockResponse` event is emitted on the `req` object.
+
+### qmock.unmockHttp( )
+
+Restore the original system implementations for `http.request` and `https.request`.
+This function can be called any time.
+
+Example
+
+    qmock.mockHttp(function(req, res) {
+        req.emit('mockResponse');
+        res.emit('data', "mock data");
+        res.emit('end');
+    })
+    var req = http.request("http://localhost", function(res) {
+        res.on('data', function(chunk) {
+            console.log("got:", chunk);
+        })
+        res.on('end', function() {
+            qmock.unmockHttp();
+        })
+    })
+    // => got: mock data
+
+
 Mock Objects
 ------------
 
@@ -268,7 +303,7 @@ Mock Objects
 Change Log
 ----------
 
-- 0.2.0 - also track stub callbacks, anonymous `spy` functions, test with qnit
+- 0.2.0 - also track stub callbacks, new anonymous `spy` functions, simple http mocking, test with qnit
 - 0.1.0 - `stub()` and `mockTimers()`, initial `spy()`
 - 0.0.8 - Jan 2015 version
 
