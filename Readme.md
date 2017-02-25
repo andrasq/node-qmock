@@ -273,6 +273,9 @@ system request functionality with `unmockHttp`.
 The callback is passed the handler-supplied or the mock-created `res` as soon as
 the `mockResponse` event is emitted on the `req` object.
 
+Note that the handler gets a client-side http.ClientRequest (what the client sends
+to the server) and http.IncomingMessage (what the client receives back).
+
 ### qmock.unmockHttp( )
 
 Restore the original system implementations for `http.request` and `https.request`.
@@ -303,6 +306,7 @@ Mock Objects
 Change Log
 ----------
 
+- 0.3.0 - mockHttpServer (experimental)
 - 0.2.0 - also track stub callbacks, new anonymous `spy` functions, simple http mocking, test with qnit
 - 0.1.0 - `stub()` and `mockTimers()`, initial `spy()`
 - 0.0.8 - Jan 2015 version
