@@ -17,7 +17,7 @@
   },
   "scripts": {
     "test": "qnit -b",
-    "coverage": "nyc --version && nyc --reporter text --reporter lcov nodeunit test || echo nyc not installed"
+    "coverage": "nyc --version && nyc --reporter text --reporter lcov qnit test || echo nyc not installed"
   },
   "keywords": [
     "Andras",
