@@ -108,6 +108,15 @@ module.exports = {
             t.equal(typeof tester.getMock, 'function');
             t.equal(typeof tester.getMockSkipConstructor, 'function');
             t.equal(typeof tester.done, 'function');
+            var decoratedMethods = [
+                'getMock', 'getMockSkipConstructor',
+                'stub', 'spy', 'mockTimers', 'unmockTimers', 'mockHttp', 'unmockHttp',
+            ];
+            for (var i=0; i<decoratedMethods.length; i++) {
+                var method = decoratedMethods[i];
+                t.equal(typeof tester[method], 'function');
+                t.equal(tester[method].name, method);
+            }
             t.done();
         },
 
