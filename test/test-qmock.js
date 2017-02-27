@@ -961,7 +961,7 @@ module.exports = {
 
         'request should return instance of ClientRequest': function(t) {
             qmock.mockHttp(function(){})
-            var req = http.request();
+            var req = http.request("", function(){});
             t.ok(req instanceof http.ClientRequest);
             t.done();
         },
