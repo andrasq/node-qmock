@@ -1046,4 +1046,28 @@ module.exports = {
             })
         },
     },
+
+    'mockHttp server': {
+        tearDown: function(done) {
+            qmock.unmockHttp();
+            done();
+        },
+
+        'should respond to request': function(t) {
+            var mock = qmock.mockHttp()
+                .when("http://localhost:1337/test/page")
+                .send(200, "It worked!", {'x-test-test': 'it worked'});
+
+            var req = http.request("http://localhost:1337/test/page", function(res) {
+                var data = "";
+                res.on('data', function(chunk){ data += chunk });
+                res.on('end', function() {
+                    t.equal(data, 'It worked!');
+                    t.done();
+                })
+            })
+            req.on('error', function(err) { t.done(err) });
+            req.end("test");
+        },
+    },
 };
