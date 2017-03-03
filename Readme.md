@@ -273,8 +273,8 @@ system request functionality with `unmockHttp`.
 The callback is passed the handler-supplied or the mock-created `res` as soon as
 the `mockResponse` event is emitted on the `req` object.
 
-Note that the handler gets a client-side http.ClientRequest (what the client sends
-to the server) and http.IncomingMessage (what the client receives back).
+Note that the handler gets a client-side `http.ClientRequest` (what the client sends
+to the server) and `http.IncomingMessage` (what the client receives back).
 
 ### qmock.unmockHttp( )
 
