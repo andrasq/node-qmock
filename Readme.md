@@ -274,7 +274,8 @@ The callback is passed the handler-supplied or the mock-created `res` as soon as
 the `mockResponse` event is emitted on the `req` object.
 
 Note that the handler gets a client-side `http.ClientRequest` (what the client sends
-to the server) and `http.IncomingMessage` (what the client receives back).
+to the server) and `http.IncomingMessage` (what the client receives back), not the
+usual server-side `IncomingMessage` and `ServerResponse` objects.
 
 ### qmock.unmockHttp( )
 
