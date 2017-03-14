@@ -76,10 +76,12 @@ If master is an existing object, this call is identical to `getMock`.
 
 Replace the named method of `object` with the override function, and return a stub
 object that holds information about calls to the method.  This form can be used to
-override or rewrite method calls.
+suppress or rewrite method calls.
 
-If an override function is not specified, the original method is called.  This form is
-useful to passively "spy" on method calls.
+If an override function is not specified, a noop function is used (changed in 0.4.0).
+The noop function does not call its callback, if any.
+
+Use `spy` to passively examine calls to the existing method or function.
 
 Returns a `stub` object that is updated with information about the last call's
 arguments, return value, exception thrown, and callback arguments:
@@ -307,6 +309,7 @@ Mock Objects
 Change Log
 ----------
 
+- 0.4.0 - breaking change: `stub()` with a noop function if no override method is given
 - 0.3.1 - fix mockHttpServer typos and parser errors (experimental)
 - 0.3.0 - extendWithMocks adds stub/spy/mockTimers/mockHttp, mockHttpServer (experimental)
 - 0.2.0 - also track stub callbacks, new anonymous `spy` functions, simple http mocking, test with qnit

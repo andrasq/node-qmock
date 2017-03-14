@@ -371,53 +371,15 @@ module.exports = {
             done();
         },
 
-        'should spy without replacing': function(t) {
+        'stub should override with noop function by default': function(t) {
             var stub = qmock.stub(this.obj, 'call');
-            this.obj.call(1, 2, 3, 4);
-            t.deepEqual(stub.callArguments, [1, 2, 3, 4]);
-            t.deepEqual(stub.callReturn, "abc123");
-            t.deepEqual(stub.callResult, "abc123");
-            t.strictEqual(stub.callError, null);
-            t.done();
-        },
-
-        'should count calls': function(t) {
-            var stub = qmock.stub(this.obj, 'call');
-            t.equal(stub.callCount, 0);
             this.obj.call();
+            t.equal(this.ncalls, 0);
             t.equal(stub.callCount, 1);
-            this.obj.call();
-            t.equal(stub.callCount, 2);
-            this.obj.call();
-            t.equal(stub.callCount, 3);
             t.done();
         },
 
-        'should make available the call arguments and return value': function(t) {
-            var stub = qmock.stub(this.obj, 'call');
-            this.obj.call(1, 2, 3);
-            t.deepEqual(stub.callArguments, [1, 2, 3]);
-            t.equal(stub.callReturn, "abc123");
-            t.equal(stub.callResult, "abc123");
-            t.done();
-        },
-
-        'should record first N calls ': function(t) {
-            var stub = qmock.stub(this.obj, 'call', null, { saveLimit: 2 });
-            this.obj.call(1);
-            this.obj.call(2, 2);
-            this.obj.call(3, 3, 3);
-            t.equal(stub.callCount, 3);
-            t.deepEqual(stub.callArguments, [3, 3, 3]);
-            t.deepEqual(stub.callReturn, "abc123");
-            t.deepEqual(stub.callResult, "abc123");
-            t.deepEqual(stub.args, [ [1], [2, 2] ]);
-            t.deepEqual(stub.getAllArguments(), [ [1], [2, 2] ]);
-            t.deepEqual(stub.getAllResults(), [ "abc123", "abc123" ]);
-            t.done();
-        },
-
-        'should override method with my call and return stub with stats': function(t) {
+        'stub should override method with my call and return stub with stats': function(t) {
             var called = null;
             var mycall;
             var stub = qmock.stub(this.obj, 'call', mycall = function mycall(a, b) {
@@ -440,7 +402,7 @@ module.exports = {
             t.done();
         },
 
-        'should restore override': function(t) {
+        'stub should restore override': function(t) {
             var originalCall = this.obj.call;
             var mycall;
             var stub = qmock.stub(this.obj, 'call', function mycall() {});
@@ -450,7 +412,7 @@ module.exports = {
             t.done();
         },
 
-        'should restore added decoration': function(t) {
+        'stub should restore added decoration': function(t) {
             t.assert(this.obj.nocall === undefined);
             var mycall;
             var stub = qmock.stub(this.obj, 'nocall', mycall = function mycall() {});
@@ -460,7 +422,7 @@ module.exports = {
             t.done();
         },
 
-        'should track thrown exceptions': function(t) {
+        'stub should track thrown exceptions': function(t) {
             var ncalls = 0;
             var myError = new Error("deliberate error");
             var stub = qmock.stub(this.obj, 'call', function mycall() {
@@ -486,7 +448,7 @@ module.exports = {
             }
         },
 
-        'should trace callbacks': function(t) {
+        'stub should track callbacks': function(t) {
             var stub = qmock.stub(this.obj, 'call', function mycall(a, b, cb) {
                 cb(null, b);
                 return 456;
@@ -505,12 +467,12 @@ module.exports = {
             t.done();
         },
 
-        'should throw callback errors': function(t) {
+        'stub should throw callback errors': function(t) {
             var myError = new Error("callback error");
             this.obj.call = function(cb) {
                 cb();
             }
-            var stub = qmock.stub(this.obj, 'call', null, { saveLimit: 1 });
+            var stub = qmock.stub(this.obj, 'call', { saveLimit: 1, stubWithSelf: true });
             try {
                 this.obj.call(function callbackThatThrows() { throw myError })
                 t.fail("should have thrown");
@@ -521,6 +483,60 @@ module.exports = {
                 t.equal(stub.callCallbackError, myError);
                 t.done();
             }
+        },
+
+        'spy should call existing method by default': function(t) {
+            var stub = qmock.spy(this.obj, 'call');
+            this.obj.call();
+            t.equal(this.ncalls, 1);
+            t.equal(stub.callCount, 1);
+            t.done();
+        },
+
+        'spy should spy without replacing': function(t) {
+            var stub = qmock.spy(this.obj, 'call');
+            this.obj.call(1, 2, 3, 4);
+            t.deepEqual(stub.callArguments, [1, 2, 3, 4]);
+            t.deepEqual(stub.callReturn, "abc123");
+            t.deepEqual(stub.callResult, "abc123");
+            t.strictEqual(stub.callError, null);
+            t.done();
+        },
+
+        'spy should count calls': function(t) {
+            var stub = qmock.spy(this.obj, 'call');
+            t.equal(stub.callCount, 0);
+            this.obj.call();
+            t.equal(stub.callCount, 1);
+            this.obj.call();
+            t.equal(stub.callCount, 2);
+            this.obj.call();
+            t.equal(stub.callCount, 3);
+            t.done();
+        },
+
+        'spy should make available the call arguments and return value': function(t) {
+            var stub = qmock.spy(this.obj, 'call');
+            this.obj.call(1, 2, 3);
+            t.deepEqual(stub.callArguments, [1, 2, 3]);
+            t.equal(stub.callReturn, "abc123");
+            t.equal(stub.callResult, "abc123");
+            t.done();
+        },
+
+        'spy should record first N calls ': function(t) {
+            var stub = qmock.spy(this.obj, 'call', { saveLimit: 2 });
+            this.obj.call(1);
+            this.obj.call(2, 2);
+            this.obj.call(3, 3, 3);
+            t.equal(stub.callCount, 3);
+            t.deepEqual(stub.callArguments, [3, 3, 3]);
+            t.deepEqual(stub.callReturn, "abc123");
+            t.deepEqual(stub.callResult, "abc123");
+            t.deepEqual(stub.args, [ [1], [2, 2] ]);
+            t.deepEqual(stub.getAllArguments(), [ [1], [2, 2] ]);
+            t.deepEqual(stub.getAllResults(), [ "abc123", "abc123" ]);
+            t.done();
         },
 
         'spy should return a stub': function(t) {
