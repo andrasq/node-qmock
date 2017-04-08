@@ -207,6 +207,16 @@ Example
     process.stderr.write("another message\n");
     // => another message
 
+### qmock.stubOnce( object, methodName [,overrideFunction] )
+
+One-shot stub:  stub the method like `qmock.stub()`, but `restore` the original
+method after the first call.
+
+### qmock.spyOnce( object, methodName [,override] )
+
+One-shot spy:  spy on the function or method like `qmock.spy()`, but `restore` the
+original after the first call.  Functions cannot be restored, only methods can.
+
 ### qmock.mockTimers( )
 
 Replace the nodejs timers functions `setImmediate`, `clearImmediate`, `setTimeout`
@@ -309,6 +319,7 @@ Mock Objects
 Change Log
 ----------
 
+- 0.5.0 - `stubOnce` and `spyOnce`
 - 0.4.0 - breaking change: `stub()` with a noop function if no override method is given
 - 0.3.1 - fix mockHttpServer typos and parser errors (experimental)
 - 0.3.0 - extendWithMocks adds stub/spy/mockTimers/mockHttp, mockHttpServer (experimental)
