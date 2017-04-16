@@ -346,3 +346,6 @@ Todo
 - add returnCallback() method to return err, for callbacks not just direct returns
 
 - clone un-enumerable properties as well, retaining their original definitions
+
+- `inherit()` and `disinherit()` calls: annotate the prototype (inherited properties) of the object,
+  for e.g. x = 3; x.__proto__.a = 1
