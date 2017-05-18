@@ -16,8 +16,8 @@
     "node": ">=0.0.0"
   },
   "scripts": {
-    "test": "qnit -b",
-    "coverage": "nyc --version && nyc --reporter text --reporter lcov qnit test || echo nyc not installed",
+    "test": "qnit -b test",
+    "coverage": "nyc --reporter text --reporter lcov npm tset",
     "clean": "rm -rf .nyc_output coverage"
   },
   "keywords": [

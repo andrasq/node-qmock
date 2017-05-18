@@ -10,8 +10,8 @@ Can stub, spy, and mock classes, objects, and the system timers.
 The master can be a class (constructor function) or an existing object.
 The mock is a fully functional object, with some methods possibly stubbed out.
 
-`qmock` is testing framework agnostic; mocks can be used standalone.  I tried
-to integrate them into nodeunit, but that's still rough.
+`qmock` is testing framework agnostic; mocks can be used standalone.  They are
+integrated into the [`qnit`](https://npmjs.com/package/qnit) unit test runner.
 
 Installation
 ------------
