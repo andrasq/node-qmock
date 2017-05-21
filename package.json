@@ -1,6 +1,6 @@
 {
   "name": "qmock",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "class and object mocking, method stubbing and spying",
   "license": "Apache-2.0",
   "repository": {
@@ -17,7 +17,7 @@
   },
   "scripts": {
     "test": "qnit -b test",
-    "coverage": "nyc --reporter text --reporter lcov npm tset",
+    "coverage": "nyc --reporter text --reporter lcov npm test",
     "clean": "rm -rf .nyc_output coverage"
   },
   "keywords": [

@@ -319,6 +319,7 @@ Mock Objects
 Change Log
 ----------
 
+- 0.5.1 - fix, test and export stubOnce / spyOnce, fix coverage script
 - 0.5.0 - `stubOnce` and `spyOnce`
 - 0.4.0 - breaking change: `stub()` with a noop function if no override method is given
 - 0.3.1 - fix mockHttpServer typos and parser errors (experimental)

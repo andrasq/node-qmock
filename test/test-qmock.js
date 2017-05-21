@@ -41,6 +41,14 @@ module.exports = {
     },
 
     'QMock': {
+        'should export stub and spy': function(t) {
+            t.equal(typeof qmock.stub, 'function');
+            t.equal(typeof qmock.spy, 'function');
+            t.equal(typeof qmock.stubOnce, 'function');
+            t.equal(typeof qmock.spyOnce, 'function');
+            t.done()
+        },
+
         'should return a clone of the object': function(t) {
             var i;
             var obj = this.templateObject;
@@ -125,6 +133,34 @@ module.exports = {
             t.expect(1);
             try { QMock.extendWithMocks(tester); assert(false, "expected error"); }
             catch (err) { t.ok(true); };
+            t.done();
+        },
+
+        'should stubOnce': function(t) {
+            var ncalls = 0;
+            var callArg;
+            var obj = { fn: function(x) { callArg = x; ncalls += 1 } };
+            var stub = qmock.stubOnce(obj, 'fn');
+            obj.fn(11);
+            obj.fn(22);
+            // stub traps calls, only the un-stubbed should show up
+            t.equal(ncalls, 1);
+            t.equal(callArg, 22);
+            t.equal(stub.callCount, 1);
+            t.deepEqual(stub.callArguments, [11]);
+            t.done();
+        },
+
+        'should spyOnce': function(t) {
+            var ncalls = 0;
+            var obj = { fn: function() { ncalls += 1 } };
+            var spy = qmock.spyOnce(obj, 'fn');
+            obj.fn(11);
+            obj.fn(22);
+            // spy passes through the calls, both should show up
+            t.equal(ncalls, 2);
+            t.equal(spy.callCount, 1);
+            t.deepEqual(spy.callArguments, [11]);
             t.done();
         },
     },
