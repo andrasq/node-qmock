@@ -115,9 +115,10 @@ module.exports = {
                 t.equal(stub.callError, myError);
                 t.equal(stub.callReturn, null);
                 t.equal(stub.callResult, null);
+                // note: node-v0.10 deepEqual is strict, newer is not strict
                 t.deepEqual(stub.getAllErrors(), [ null, myError ]);
                 t.deepEqual(stub.getAllArguments(), [ [1], [7, 6, 5] ]);
-                t.deepEqual(stub.getAllResults(), [ 1, null ]);
+                t.deepEqual(stub.getAllResults(), [ 1, undefined ]);
                 t.done();
             }
         },
