@@ -521,6 +521,28 @@ module.exports = {
             }
         },
 
+        'spy should reject a non-function': function(t) {
+            t.throws(function(){ qmock.spy(123); })
+            t.throws(function(){ qmock.spy({}); })
+            t.done();
+        },
+
+        'spy should default to 10 saved calls': function(t) {
+            // without options
+            var spy = qmock.spy();
+            t.equal(spy.stub._saveLimit, 10);
+            var spy2 = qmock.spy({fn: function(){}}, 'fn');
+            t.equal(spy2._saveLimit, 10);
+
+            // not included in options
+            var spy3 = qmock.spy(null, null, {});
+            t.equal(spy3.stub._saveLimit, 10);
+            var spy4 = qmock.spy({fn: function(){}}, 'fn', {});
+            t.equal(spy4._saveLimit, 10);
+
+            t.done();
+        },
+
         'spy should call existing method by default': function(t) {
             var stub = qmock.spy(this.obj, 'call');
             this.obj.call();
@@ -610,6 +632,13 @@ module.exports = {
             object.method();
             t.equal(ncalls, 1);
             t.equal(object.method, fn);
+            t.done();
+        },
+
+        'spy should error out on restore of bare function': function(t) {
+            var spy = qmock.spy(function(){});
+            t.equal(typeof spy.restore, 'function');
+            t.throws(spy.restore);
             t.done();
         },
 
