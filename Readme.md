@@ -322,6 +322,8 @@ Mock Objects
 Change Log
 ----------
 
+- 0.5.5 - fix code and tests to make unit tests pass under node-v0.10
+- 0.5.2 - make stub() without args return an anonymous stub function like `spy()`
 - 0.5.1 - fix, test and export stubOnce / spyOnce, fix coverage script
 - 0.5.0 - `stubOnce` and `spyOnce`
 - 0.4.0 - breaking change: `stub()` with a noop function if no override method is given
