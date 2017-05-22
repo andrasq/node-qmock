@@ -407,11 +407,30 @@ module.exports = {
             done();
         },
 
+        'stub should create an anonymous stub': function(t) {
+            var stub = qmock.stub();
+            t.equal(typeof stub, 'function');
+            t.equal(typeof stub.stub, 'object');
+            t.equal(stub.stub._saveLimit, 0);
+
+            var stub2 = qmock.stub(null, function(){});
+            t.equal(typeof stub2, 'function');
+            t.equal(typeof stub2.stub, 'object');
+            t.equal(stub2.stub._saveLimit, 0);
+
+            t.done();
+        },
+
         'stub should override with noop function by default': function(t) {
             var stub = qmock.stub(this.obj, 'call');
             this.obj.call();
             t.equal(this.ncalls, 0);
             t.equal(stub.callCount, 1);
+            t.done();
+        },
+
+        'stub should reject non-function override method': function(t) {
+            t.throws(function(){ qmock.stub({ fn: 1 }, 'fn', 123, {}) });
             t.done();
         },
 
