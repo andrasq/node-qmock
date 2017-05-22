@@ -35,6 +35,6 @@
     "mongoid-js": "1.1.0"
   },
   "devDependencies": {
-    "qnit": "0.13.0"
+    "qnit": "0.15.2"
   }
 }
