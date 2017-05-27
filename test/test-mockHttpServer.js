@@ -490,6 +490,25 @@ module.exports = {
                 req.end();
             },
 
+            'should emit error programmatically': function(t) {
+                var mock = qmock.mockHttp()
+                    .when("http://test/call")
+                    .emit('error', new Error("test error 409"))
+                    .end(409)
+                var req = http.request("http://test/call", function(res) {
+                    res.resume();
+                    t.expect(2);
+                    res.on('error', function(err) {
+                        t.equal(err.message, "test error 409");
+                    })
+                    res.on('end', function() {
+                        t.equal(res.statusCode, 409);
+                        t.done();
+                    })
+                })
+                req.end()
+            },
+
             'throw action should inject error': function(t) {
                 t.skip();
 

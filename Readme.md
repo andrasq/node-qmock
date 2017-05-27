@@ -89,6 +89,10 @@ Use `spy` to passively examine calls to the existing method or function.
 Returns a `stub` object that is updated with information about the last call's
 arguments, return value, exception thrown, and callback arguments:
 
+### qmock.stub( )
+
+Return an anonymous stub function like `qmock.spy()`.
+
 #### stub.callCount
 
 Number of calls made to the stub.
@@ -292,6 +296,83 @@ Note that the handler gets a client-side `http.ClientRequest` (what the client s
 to the server) and `http.IncomingMessage` (what the client receives back), not the
 usual server-side `IncomingMessage` and `ServerResponse` objects.
 
+### qmock.mockHttp( )
+
+Experimental.
+
+Without arguments, `mockHttp` mocks an http server, and returns the mock server
+object.  The mock server has methods to recognize and respond to calls to mocked
+routes.
+
+#### server.when( condition )
+
+Match the route against the condition.  If the route matches `condition`, the actions
+that follow will be run to generate the response for the route.
+
+The `http.request` callback is called before the first matching action is run, and the
+`'end'` event is emitted when no more actions are left to run.  Note that because the
+actions that build the respones have not been run yet, the `res.statusCode` and other
+response fields may remain undefined until the res `'end'` event has been received.
+
+Conditions:
+
+- `string` - match the full url or the request pathname against the string
+- `RegExp` - match the url or pathname againsdt the regular expression
+- `function(req, res)` - use the given function to test whether the route matches
+
+#### server.before( )
+
+The `before` actions are run for all matched routes before their condition actions are run.
+
+#### server.after( )
+
+The `after` actions are run for all matched routes after their condition actions are run.
+
+Actions:
+
+#### server.send( [statusCode], [responseBody], [responseHeaders] )
+
+#### server.write( responseBodyChunk )
+
+#### server.writeHead( [statusCode], [responseHeaders] )
+
+#### server.end( [statusCode], [responseBody] )
+
+#### server.compute( callback(req, res, next) )
+
+#### server.delay( ms )
+
+#### server.emit( event, [arg1, arg2, ...] )
+
+Emit an event on the `res` object.
+
+Example
+
+    var mockServer = qmock.mockHttp()
+        .when("http://localhost:1337/test/call")
+        .send(204)
+        .when("http://localhost:1337/test/error")
+        .emit('error', new Error("error 409"))
+        .send(409, "test error 409", { 'test-header-1': 'test-value-1' })
+
+    var req = http.request("http://localhost:1337/test/error", function(res) {
+        var response = "";
+        res.on('data', function(chunk) {
+            response += chunk;
+        })
+        res.on('end', function() {
+            assert.equal(res.statusCode, 400);
+            assert.equal(response, "test error 409");
+            assert.equal(res.headers['test-header-1'], 'test-value-1');
+        })
+        res.on('error', function(err) {
+            console.log("got err '%s'", err.message)
+        })
+    })
+    req.end("test request body");
+
+    // => got err 'error 409'
+
 ### qmock.unmockHttp( )
 
 Restore the original system implementations for `http.request` and `https.request`.
@@ -322,7 +403,7 @@ Mock Objects
 Change Log
 ----------
 
-- 0.6.0 - new `mockHttp()` methods `write`, `writeHead` and `end`
+- 0.6.0 - new `mockHttp()` methods `write`, `writeHead`, `end` and `emit`, document `mockHttp()`
 - 0.5.5 - fix code and tests to make unit tests pass under node-v0.10
 - 0.5.2 - make stub() without args return an anonymous stub function like `spy()`
 - 0.5.1 - fix, test and export stubOnce / spyOnce, fix coverage script
