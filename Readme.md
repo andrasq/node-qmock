@@ -7,11 +7,7 @@ qmock
 Light-weight test double library for easier testing of dependency injection style
 code.  Patterned somewhat after `phpunit`, which looks like `junit` I believe.
 
-Can stub, spy, and mock classes, objects, and the system timers.
-
-`qmock.getMock(master)` returns a mock object that is instanceof `master`.
-The master can be a class (constructor function) or an existing object.
-The mock is a fully functional object, with some methods possibly stubbed out.
+Can stub, spy, and mock classes, objects, the system timers, and http calls.
 
 `qmock` is testing framework agnostic; mocks can be used standalone.  They are
 integrated into the [`qnit`](https://npmjs.com/package/qnit) unit test runner.
@@ -44,6 +40,10 @@ Example
 
 Mock Objects API
 ----------------
+
+`qmock.getMock(master)` returns a mock object that is instanceof `master`.
+The master can be a class (constructor function) or an existing object.
+The mock is a fully functional object, with some methods possibly stubbed out.
 
 ### qmock.getMock( master, methodNames [,constructorArgs] )
 
@@ -78,23 +78,22 @@ If master is an existing object, this call is identical to `getMock`.
 Stub and Spy API
 ----------------
 
+Stubs are stand-in methods that track and instrument calls.  Spies are fully
+functional methods annotated with instrumentation.  Their functionality overlaps.
+
 ## qmock.stub( object, methodName [,overrideFunction] )
 
-Replace the named method of `object` with the override function, and return a stub
-object that holds information about calls to the method.  This form can be used to
-suppress or rewrite method calls.
+Replace the named method of `object` with an anonymous noop function or the specified
+override, and return a stub object that will contain information about calls to the
+method.  This form can be used to suppress or rewrite method calls.
 
 If an override function is not specified, a noop function is used (changed in 0.4.0).
 The noop function does not call its callback, if any.
 
-Use `spy` to passively examine calls to the existing method or function.
+Use `spy` to passively examine calls to an existing method or function.
 
 Returns a `stub` object that is updated with information about the last call's
 arguments, return value, exception thrown, and callback arguments:
-
-## qmock.stub( )
-
-Return an anonymous stub function like `qmock.spy()`.
 
 ### stub.callCount
 
@@ -150,6 +149,10 @@ Example:
     console.log("this line will not appear");
     // no output, line not reached
 
+## qmock.stub( )
+
+With no arguments, returns an instrumented anonymous stub function like `qmock.spy()`.
+
 ## qmock.spy( [func] )
 
 Spy on calls to the given function.  Returns an instrumented function that tracks
@@ -175,11 +178,11 @@ Example
 ## qmock.spy( object, methodName [,override] )
 
 Spy on calls to the named method of the object.  If the `override` function is given,
-the method will be replaced with the override.  Returns a `stub` object that holds
+the method will be replaced with the override.  Returns a `spy` object that holds
 information about the calls made.  The object method can be restored to the original
-with `stub.restore()`.
+with `spy.restore()`.
 
-The returned `spy` contains the call stats like with `qmock.stub()`, with additional
+The returned `spy` contains the call stats like `qmock.stub()`, with additional
 methods:
 
 ### spy.getAllArguments( )
@@ -231,6 +234,9 @@ original after the first call.  Functions cannot be restored, only methods can.
 Mock Timers API
 ---------------
 
+`mockTimers` overrides the system setImmediate, setTimeout, etc calls with mock
+work-alikes.  `unmockTimers` restores the system timers.
+
 ## qmock.mockTimers( )
 
 Replace the nodejs timers functions `setImmediate`, `clearImmediate`, `setTimeout`
@@ -243,7 +249,7 @@ timers calls in effect with a new set.  Note that any pending immediates and tim
 in the system timers will still trigger, but with follow-up timeouts queued into the
 mock.
 
-Returns a mock timeouts `clock`.
+Returns a mock timeouts `clock` that controls the passage of events time:
 
 ### clock.tick( [n] )
 
@@ -285,11 +291,14 @@ Example:
 
 Restore the global `setImmediate`, `setTimeout` etc functions back to their inital
 original nodejs versions.  Can be called any time.  Note that any pending timeouts
-in the active mock timers will trigger if strobed with `clock.tick()`.
+in the mock timers can still be triggered with `clock.tick()`.
 
 
 Mock Http API
 -------------
+
+`mockHttp` overrides `http.request` and `https.request` with mocks that return
+user-supplied values.  `unmockHttp` restores the system http functions.
 
 ## qmock.mockHttp( handler(req, res) )
 
@@ -306,6 +315,23 @@ the `mockResponse` event is emitted on the `req` object.
 Note that the handler gets a client-side `http.ClientRequest` (what the client sends
 to the server) and `http.IncomingMessage` (what the client receives back), not the
 usual server-side `IncomingMessage` and `ServerResponse` objects.
+
+Example
+
+    qmock.mockHttp(function(req, res) {
+        req.emit('mockResponse');
+        res.emit('data', "mock data");
+        res.emit('end');
+    })
+    var req = http.request("http://localhost", function(res) {
+        res.on('data', function(chunk) {
+            console.log("got:", chunk);
+        })
+        res.on('end', function() {
+            qmock.unmockHttp();
+        })
+    })
+    // => got: mock data
 
 ## qmock.mockHttp( )
 
@@ -389,23 +415,6 @@ Example
 Restore the original system implementations for `http.request` and `https.request`.
 This function can be called any time.
 
-Example
-
-    qmock.mockHttp(function(req, res) {
-        req.emit('mockResponse');
-        res.emit('data', "mock data");
-        res.emit('end');
-    })
-    var req = http.request("http://localhost", function(res) {
-        res.on('data', function(chunk) {
-            console.log("got:", chunk);
-        })
-        res.on('end', function() {
-            qmock.unmockHttp();
-        })
-    })
-    // => got: mock data
-
 
 Change Log
 ----------
@@ -424,12 +433,6 @@ Change Log
 
 Todo
 ----
-
-- qmocks are awkward the way they hook into unit tests.  For nodeunit,
-  qmock.extendWithMocks(test, 'done') will add a getMock() method to the currently
-  running test and will check any created mocks for having met their expected
-  assertions on test.done().  It would be nicer if tie-in were made once, not
-  per test.
 
 - the nodejs property getter/setter methods should make it possible for data
   properties to be mocked too, eg getMockValue(name).  with() could map to
