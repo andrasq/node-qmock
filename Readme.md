@@ -361,7 +361,7 @@ Example
             response += chunk;
         })
         res.on('end', function() {
-            assert.equal(res.statusCode, 400);
+            assert.equal(res.statusCode, 409);
             assert.equal(response, "test error 409");
             assert.equal(res.headers['test-header-1'], 'test-value-1');
         })
