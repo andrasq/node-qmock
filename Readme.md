@@ -127,6 +127,7 @@ stub, so the callback arguments may not be from the most recent call.
 ### stub.restore( )
 
 Remove the stub and restore the original method back onto the object.
+Bare functions cannot be restored, only object methods can.
 
 Example:
 
@@ -228,14 +229,15 @@ method after the first call.
 ## qmock.spyOnce( object, methodName [,override] )
 
 One-shot spy:  spy on the function or method like `qmock.spy()`, but `restore` the
-original after the first call.  Functions cannot be restored, only methods can.
+original after the first call.
 
 
 Mock Timers API
 ---------------
 
 `mockTimers` overrides the system setImmediate, setTimeout, etc calls with mock
-work-alikes.  `unmockTimers` restores the system timers.
+work-alikes that trigger under user control.  `unmockTimers` restores the system
+timers.
 
 ## qmock.mockTimers( )
 
@@ -298,7 +300,7 @@ Mock Http API
 -------------
 
 `mockHttp` overrides `http.request` and `https.request` with mocks that return
-user-supplied values.  `unmockHttp` restores the system http functions.
+user supplied values.  `unmockHttp` restores the system http functions.
 
 ## qmock.mockHttp( handler(req, res) )
 
@@ -354,7 +356,7 @@ response fields may remain undefined until the res `'end'` event has been receiv
 Conditions:
 
 - `string` - match the full url or the request pathname against the string
-- `RegExp` - match the url or pathname againsdt the regular expression
+- `RegExp` - match the url or pathname against the regular expression
 - `function(req, res)` - use the given function to test whether the route matches
 
 ### server.before( )
