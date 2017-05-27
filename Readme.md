@@ -322,6 +322,7 @@ Mock Objects
 Change Log
 ----------
 
+- 0.6.0 - new `mockHttp()` methods `write`, `writeHead` and `end`
 - 0.5.5 - fix code and tests to make unit tests pass under node-v0.10
 - 0.5.2 - make stub() without args return an anonymous stub function like `spy()`
 - 0.5.1 - fix, test and export stubOnce / spyOnce, fix coverage script
