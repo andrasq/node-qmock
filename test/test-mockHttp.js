@@ -93,6 +93,15 @@ module.exports = {
             })
         },
 
+        'response callback should be optional': function(t) {
+            t.expect(1);
+            qmock.mockHttp(function handler(req, res) {
+                t.ok(true);
+                t.done();
+            })
+            var req = http.request({});
+        },
+
         'user http handler should receive instance of IncomingMessage': function(t) {
             t.expect(4);
             var resCount = 0;
