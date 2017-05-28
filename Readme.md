@@ -81,6 +81,10 @@ Stub and Spy API
 Stubs are stand-in methods that track and instrument calls.  Spies are fully
 functional methods annotated with instrumentation.  Their functionality overlaps.
 
+## qmock.stub( )
+
+With no arguments, returns an instrumented anonymous stub function like `qmock.spy()`.
+
 ## qmock.stub( object, methodName [,overrideFunction] )
 
 Replace the named method of `object` with an anonymous noop function or the specified
@@ -150,16 +154,34 @@ Example:
     console.log("this line will not appear");
     // no output, line not reached
 
-## qmock.stub( )
-
-With no arguments, returns an instrumented anonymous stub function like `qmock.spy()`.
-
 ## qmock.spy( [func] )
 
 Spy on calls to the given function.  Returns an instrumented function that tracks
 calls to `func`.  If no func is given, an anonymous function is created to be spied
 on, which can then be passed as eg a callback.  Returns the spy function.  The stats
 are accessible in the property `spy.stub`.
+
+Example
+
+    var qmock = require('qmock');
+    var computeFunc = function(a, b) { return a + b };
+    var spyFunc = qmock.spy(computeFunc);
+
+    var c = spyFunc(1, 2);
+
+    // c => 3
+    // spyFunc.stub.callCount => 1
+    // spyFunc.stub.callArguments => [1, 2]
+
+## qmock.spy( object, methodName [,override] )
+
+Spy on calls to the named method of the object.  If the `override` function is given,
+the method will be replaced with the override.  Returns a `spy` object that holds
+information about the calls made.  The object method can be restored to the original
+with `spy.restore()`.
+
+The returned `spy` contains the call stats like `qmock.stub()`, with additional
+methods:
 
 Example
 
@@ -175,16 +197,6 @@ Example
     process.stderr.write = originalWrite;
     process.stderr.write("another message\n");
     // => another message
-
-## qmock.spy( object, methodName [,override] )
-
-Spy on calls to the named method of the object.  If the `override` function is given,
-the method will be replaced with the override.  Returns a `spy` object that holds
-information about the calls made.  The object method can be restored to the original
-with `spy.restore()`.
-
-The returned `spy` contains the call stats like `qmock.stub()`, with additional
-methods:
 
 ### spy.getAllArguments( )
 
