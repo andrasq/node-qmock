@@ -433,6 +433,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.6.1 - readme updates
 - 0.6.0 - new `mockHttp()` methods `write`, `writeHead`, `end` and `emit`, document `mockHttp()`
 - 0.5.5 - fix code and tests to make unit tests pass under node-v0.10
 - 0.5.2 - make stub() without args return an anonymous stub function like `spy()`
