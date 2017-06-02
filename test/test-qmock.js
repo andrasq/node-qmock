@@ -135,6 +135,19 @@ module.exports = {
             catch (err) { t.ok(true); };
             t.done();
         },
+
+        'should decorate with all exported methods': function(t) {
+            var tester = qmock.extendWithMocks({});
+            for (var name in qmock) {
+                if (typeof qmock[name] === 'function') {
+                    t.ok(tester[name]);
+                }
+                if (name !== 'getMock' && name !== 'getMockSkipConstructor') {
+                    t.equal(tester[name], qmock[name]);
+                }
+            }
+            t.done();
+        },
     },
 
     'getMock': {
