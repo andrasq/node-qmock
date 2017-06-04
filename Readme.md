@@ -323,8 +323,8 @@ immediately after the caller receives the `req` return object.  This function ca
 be called at any time, each replaces the previous override.  Restore the default
 system request functionality with `unmockHttp`.
 
-The callback is passed the handler-supplied or the mock-created `res` as soon as
-the `mockResponse` event is emitted on the `req` object.
+The `request` callback is passed the mock `res` object or the `res` supplied by the
+handler as asson as `mockResponse` event is emitted `req.emit('mockResponse', [res])`.
 
 Note that the handler gets a client-side `http.ClientRequest` (what the client sends
 to the server) and `http.IncomingMessage` (what the client receives back), not the
@@ -452,13 +452,11 @@ Todo
 - the nodejs property getter/setter methods should make it possible for data
   properties to be mocked too, eg getMockValue(name).  with() could map to
   set, will() to get.
-
 - introduce a havingReturned() method to be able to inspect not just the
   called with arguments but the method return value as well
-
 - add returnCallback() method to return err, for callbacks not just direct returns
-
 - clone un-enumerable properties as well, retaining their original definitions
-
 - `inherit()` and `disinherit()` calls: annotate the prototype (inherited properties) of the object,
   for e.g. x = 3; x.__proto__.a = 1
+- mockHttp() needs a `when('default')` clause and a `makeRequest()` action
+  ('default' is easier to read than a match-all regex eg `/^/`)
