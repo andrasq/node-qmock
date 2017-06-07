@@ -433,6 +433,9 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.6.3 - set `stub.called` for sinon compat, fix getMock(Constructor), fix extendWithMocks().getMockSkipConstructor,
+          fix mocks when have expects/method/check methods, fix QMock.expects() when mocked has expects() method
+- 0.6.2 - fix extendWithMocks to export all mock methods
 - 0.6.1 - readme updates
 - 0.6.0 - new `mockHttp()` methods `write`, `writeHead`, `end` and `emit`, document `mockHttp()`
 - 0.5.5 - fix code and tests to make unit tests pass under node-v0.10
