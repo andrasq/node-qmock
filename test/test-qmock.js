@@ -17,15 +17,14 @@ var MockTimers = mockTimers.MockTimers;
 
 module.exports = {
     setUp: function(done) {
-        this.templateClass = function() {
-            return {
-                a: 1,
-                b: 2.34,
-                c: null,
-                d: false,
-                e: { a:1 },
-                f: function() { return 'e'; },
-            };
+        this.templateClass = function MockClass() {
+            this.a = 1;
+            this.b = 2.34;
+            this.c = null;
+            this.d = false;
+            this.e = { a:1 };
+            this.f = function() { return 'f'; };
+            return this;
         };
         this.templateObject = new this.templateClass();
         done();
@@ -40,7 +39,7 @@ module.exports = {
         t.done();
     },
 
-    'QMock': {
+    'qmock': {
         'should export stub and spy': function(t) {
             t.equal(typeof qmock.stub, 'function');
             t.equal(typeof qmock.spy, 'function');
@@ -49,7 +48,49 @@ module.exports = {
             t.done()
         },
 
-        'should return a clone of the object': function(t) {
+        'should create new mock': function(t) {
+            var mock = new QMock();
+            t.ok(mock instanceof QMock);
+            t.done();
+        },
+
+        'should build new mock': function(t) {
+            var mock = QMock();
+            t.ok(mock instanceof QMock);
+            t.done();
+        },
+
+        'getMock should copy properties': function(t) {
+            var mock = qmock.getMock({ a: 1, b: 2.34 });
+            t.equal(mock.a, 1);
+            t.equal(mock.b, 2.34);
+            t.done();
+        },
+
+        'getMock should retain existing methods': function(t) {
+            var expects = function(){};
+            var method = function(){};
+            var check = function(){};
+            var mock1 = qmock.getMock({});
+            var mock2 = qmock.getMock({ expects: expects, method: method, check: check });
+            t.equal(mock2.expects, expects);
+            t.equal(mock2.method, method);
+            t.equal(mock2.check, check);
+            t.ok(typeof mock1.expects == 'function' && mock1.expects != expects);
+            t.ok(typeof mock1.method == 'function' && mock1.method != method);
+            t.ok(typeof mock1.check == 'function' && mock1.check != check);
+            t.done();
+        },
+
+        'getMock should stub named methods': function(t) {
+            var obj = { a: 1, f: function(){} };
+            var mock = qmock.getMock(obj, ['f']);
+            t.equal(typeof mock.f, 'function');
+            t.ok(mock.f != obj.f);
+            t.done();
+        },
+
+        'getMock should return a clone of the object': function(t) {
             var i;
             var obj = this.templateObject;
             var mock = QMock.getMock(obj, []);
@@ -59,9 +100,32 @@ module.exports = {
             t.done();
         },
 
+        'getMockSkipConstructor should return a clone of the object': function(t) {
+            var mock = qmock.getMockSkipConstructor(this.templateObject);
+            t.equal(mock.a, 1);
+            t.equal(mock.b, 2.34);
+            t.done();
+        },
+
+        'getMock should return a clone from a constructor': function(t) {
+            var mock = qmock.getMock(this.templateClass);
+            t.ok(mock instanceof this.templateClass);
+            t.equal(mock.a, 1);
+            t.equal(mock.b, 2.34);
+            t.done();
+        },
+
+        'getMockSkipConstructor should return a clone of the class without running constructor': function(t) {
+            var mock = qmock.getMockSkipConstructor(this.templateClass);
+            t.ok(mock instanceof this.templateClass);
+            t.equal(mock.a, undefined);
+            t.equal(mock.b, undefined);
+            t.done();
+        },
+
         'should return an instance of a mocked constructor': function(t) {
-            var constructor = function() { this.a = 1; };
-            var obj = new constructor();
+            var ctor = function() { this.a = 1; };
+            var obj = new ctor();
             t.done();
         },
 
@@ -146,6 +210,36 @@ module.exports = {
                     t.equal(tester[name], qmock[name]);
                 }
             }
+            t.done();
+        },
+
+        'should decorate with getMock that invokes qmock.getMock': function(t) {
+            var getMock = qmock.getMock;
+            var called = false;
+            qmock.getMock = function(){ called = arguments[2] };
+            var tester = qmock.extendWithMocks({});
+            tester.getMock(Date, [], [123]);
+            qmock.getMock = getMock;
+            t.deepEqual(called, [123]);
+            t.done();
+        },
+
+        'should decorate with getMockSkipConstructor that invokes qmock.getMockSkipConstructor': function(t) {
+            var getMockSkipConstructor = qmock.getMockSkipConstructor;
+            var called = false;
+            qmock.getMockSkipConstructor = function(){ called = true };
+            var tester = qmock.extendWithMocks({});
+            tester.getMockSkipConstructor(Date);
+            qmock.getMockSkipConstructor = getMockSkipConstructor;
+            t.deepEqual(called, true);
+            t.done();
+        },
+
+        'decorated tester should call done method': function(t) {
+            var called = false;
+            var doneMethod = function() { called = true };
+            var tester = qmock.extendWithMocks({ done: doneMethod, testCall: function(){} }, 'done');
+            tester.done();
             t.done();
         },
     },
