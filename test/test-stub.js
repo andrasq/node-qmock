@@ -45,6 +45,7 @@ module.exports = {
             this.obj.call();
             t.equal(this.ncalls, 0);
             t.equal(stub.callCount, 1);
+            t.strictEqual(stub.called, true);
             t.done();
         },
 
