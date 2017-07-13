@@ -380,7 +380,7 @@ Examples:
     .when(/^POST:/)                     - match any POST request
     .when(/^/)                          - match any request
     .when(function(req, res) {          - match any request with Basic user:pass authorization
-        return (req._headers['authorization'].indexOf('Basic: ') === 0);
+        return (req._headers['authorization'].indexOf('Basic ') === 0);
     })
 
 ### server.before( )
@@ -449,7 +449,8 @@ This function can be called any time.
 Change Log
 ----------
 
-- 0.6.4 - also test with node-v8, experimental server.throw action, match POST:, DEL: etc qualified urls or pathnames
+- 0.6.4 - also test with node-v8, experimental server.throw action, match POST:, DEL: etc qualified urls or pathnames,
+          stub req.sock.setTimeout
 - 0.6.3 - set `stub.called` for sinon compat, fix getMock(Constructor), fix extendWithMocks().getMockSkipConstructor,
           fix mocks when have expects/method/check methods, fix QMock.expects() when mocked has expects() method
 - 0.6.2 - fix extendWithMocks to export all mock methods
@@ -483,4 +484,4 @@ Todo
 - make mockHttpServer server.when matches be use-once, deleted once consumed.
   Could then pre-configure multiple different for the same query, each used just once.
   Add a `.reuse()` setting to tag which handlers to reuse, which to delete.
-- mock the res socket for setTimeout()
+- .when().timeout(ms) action to emulate a req timeout
