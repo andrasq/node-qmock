@@ -368,8 +368,20 @@ response fields may remain undefined until the res `'end'` event has been receiv
 Conditions:
 
 - `string` - match the full url or the request pathname against the string
+- `METHOD:string` - match the full annotated url or annotated request pathname against the string,
+  The annotated url would look something like "POST:http://localhost:80/pathname".
 - `RegExp` - match the url or pathname against the regular expression
 - `function(req, res)` - use the given function to test whether the route matches
+
+Examples:
+
+    .when('http://localhost:80/')       - match any http request to localhost port 80
+    .when(/\/test\//)                   - match any request with "/test/" in its pathname
+    .when(/^POST:/)                     - match any POST request
+    .when(/^/)                          - match any request
+    .when(function(req, res) {          - match any request with Basic user:pass authorization
+        return (req._headers['authorization'].indexOf('Basic: ') === 0);
+    })
 
 ### server.before( )
 
@@ -437,7 +449,7 @@ This function can be called any time.
 Change Log
 ----------
 
-- 0.6.4 - also test with node-v8, experimental server.throw action
+- 0.6.4 - also test with node-v8, experimental server.throw action, match POST:, DEL: etc qualified urls or pathnames
 - 0.6.3 - set `stub.called` for sinon compat, fix getMock(Constructor), fix extendWithMocks().getMockSkipConstructor,
           fix mocks when have expects/method/check methods, fix QMock.expects() when mocked has expects() method
 - 0.6.2 - fix extendWithMocks to export all mock methods
@@ -471,3 +483,4 @@ Todo
 - make mockHttpServer server.when matches be use-once, deleted once consumed.
   Could then pre-configure multiple different for the same query, each used just once.
   Add a `.reuse()` setting to tag which handlers to reuse, which to delete.
+- mock the res socket for setTimeout()

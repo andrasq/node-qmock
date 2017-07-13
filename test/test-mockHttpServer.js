@@ -375,6 +375,50 @@ module.exports = {
                 req.end();
             },
 
+            'should match by method and url string': function(t) {
+                var mock = qmock.mockHttp()
+                    .when("POST:http://localhost:1337/test/call")
+                var uri = { method: 'POST', hostname: 'localhost', port: 1337, pathname: "/test/call" };
+                var req = http.request(uri, function(res){ t.done(); });
+                req.on('error', function(err) { t.done(err) });
+                req.end();
+
+                uri.method = 'GET';
+                var req = http.request(uri, function(res){ t.fail(); });
+                req.on('error', function(err) { t.contains(err.message, 'no handler for') })
+                req.end();
+            },
+
+            'should match by method and path string': function(t) {
+                var mock = qmock.mockHttp()
+                    .when("POST:/test/call")
+                var uri = { method: 'POST', hostname: 'localhost', port: 1337, pathname: "/test/call" };
+                var req = http.request(uri, function(res){ t.done(); });
+                req.on('error', function(err) { t.done(err) });
+                req.end();
+
+                uri.method = 'GET';
+                var req = http.request(uri, function(res){ t.fail(); });
+                req.on('error', function(err) { t.contains(err.message, 'no handler for') })
+                req.end();
+            },
+
+            'should match by method and regex': function(t) {
+                var mock = qmock.mockHttp()
+                    .when(/POST:.*test.call/)
+                var uri = { method: 'POST', hostname: 'localhost', port: 1337, pathname: "/test/call/yes/matched" };
+                var req = http.request(uri, function(res){
+                    t.done();
+                });
+                req.on('error', function(err) { t.done(err) });
+                req.end();
+
+                uri.method = 'GET';
+                var req = http.request(uri, function(res){ t.fail(); });
+                req.on('error', function(err) { t.contains(err.message, 'no handler for') })
+                req.end();
+            },
+
             'should match by function': function(t) {
                 var mock = qmock.mockHttp()
                     .when(function(req, res) {
