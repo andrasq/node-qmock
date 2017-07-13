@@ -323,6 +323,7 @@ module.exports = {
                 res.on('data', function(chunk) {
                     responses.push(chunk.toString());
                     if (responses.length === 3) {
+                        // NOTE: node-v8.1.4 failed on [0] under tracis-ci once... node timers?
                         t.ok(responses[0] === "2");
                         t.ok(responses[1] === "1");
                         t.ok(responses[2] === "1");
