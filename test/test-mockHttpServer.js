@@ -509,18 +509,20 @@ module.exports = {
                 req.end()
             },
 
-            'throw action should inject error': function(t) {
-                t.skip();
-
+            'throw action should inject req error': function(t) {
                 var mock = qmock.mockHttp()
                     .before()
-                    .throw(new Error("before error"))
+                      .throw(new Error("before error"))
                     .when(/./)
-                var req = http.request("http://localhost", function(res) { });
-                // FIXME: throws in top level context, treated by tester as fatal
-                // FIXME: need way to tell qnit to ignore next top-level error
-                process.once('unhandledException', function(err) {
-                    t.equal(err.message, 'before error');
+                      .end(200)
+                t.expect(1);
+                var req = http.request("http://localhost", function(res) {
+                    res.on('end', function() {
+                        t.fail();
+                    })
+                })
+                req.on('error', function(err) {
+                    t.equal(err.message, "before error");
                     t.done();
                 })
                 req.end();
