@@ -468,3 +468,6 @@ Todo
   for e.g. `x = 3; inherit(x, 'a', 1); assert(x.a === 1)`
 - mockHttp() needs a `when('default')` clause and a `makeRequest()` action
   ('default' is easier to read than a match-all regex eg `/^/`)
+- make mockHttpServer server.when matches be use-once, deleted once consumed.
+  Could then pre-configure multiple different for the same query, each used just once.
+  Add a `.reuse()` setting to tag which handlers to reuse, which to delete.
