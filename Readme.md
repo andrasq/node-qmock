@@ -450,7 +450,7 @@ Change Log
 ----------
 
 - 0.6.4 - also test with node-v8, experimental server.throw action, match POST:, DEL: etc qualified urls or pathnames,
-          stub req.sock.setTimeout
+          stub req.sock.setTimeout, propagate uri.headers to req._headers
 - 0.6.3 - set `stub.called` for sinon compat, fix getMock(Constructor), fix extendWithMocks().getMockSkipConstructor,
           fix mocks when have expects/method/check methods, fix QMock.expects() when mocked has expects() method
 - 0.6.2 - fix extendWithMocks to export all mock methods
