@@ -397,6 +397,10 @@ Actions:
 
 Emit an event on the `res` object.
 
+### server.throw( err )
+
+Emit the error event on the `req` object.
+
 Example
 
     var mockServer = qmock.mockHttp()
@@ -433,6 +437,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.6.4 - also test with node-v8, experimental server.throw action
 - 0.6.3 - set `stub.called` for sinon compat, fix getMock(Constructor), fix extendWithMocks().getMockSkipConstructor,
           fix mocks when have expects/method/check methods, fix QMock.expects() when mocked has expects() method
 - 0.6.2 - fix extendWithMocks to export all mock methods
@@ -460,6 +465,6 @@ Todo
 - add returnCallback() method to return err, for callbacks not just direct returns
 - clone un-enumerable properties as well, retaining their original definitions
 - `inherit()` and `disinherit()` calls: annotate the prototype (inherited properties) of the object,
-  for e.g. x = 3; x.__proto__.a = 1
+  for e.g. `x = 3; inherit(x, 'a', 1); assert(x.a === 1)`
 - mockHttp() needs a `when('default')` clause and a `makeRequest()` action
   ('default' is easier to read than a match-all regex eg `/^/`)
