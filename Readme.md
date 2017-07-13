@@ -401,10 +401,10 @@ Example
 
     var mockServer = qmock.mockHttp()
         .when("http://localhost:1337/test/call")
-        .send(204)
+          .send(204)
         .when("http://localhost:1337/test/error")
-        .emit('error', new Error("error 409"))
-        .send(409, "test error 409", { 'test-header-1': 'test-value-1' })
+          .emit('error', new Error("error 409"))
+          .send(409, "test error 409", { 'test-header-1': 'test-value-1' })
 
     var req = http.request("http://localhost:1337/test/error", function(res) {
         var response = "";
