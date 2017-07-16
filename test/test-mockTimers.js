@@ -36,6 +36,12 @@ module.exports = {
             t.done();
         },
 
+        'should export test functions': function(t) {
+            t.equal(typeof mockTimers.MockTimers, 'function');
+            t.equal(typeof mockTimers.overrideTimers, 'function');
+            t.done();
+        },
+
         'should restore timers': function(t) {
             for (var k in this.originals) global[k] = undefined;
             t.assert(!setImmediate);
@@ -64,6 +70,19 @@ module.exports = {
         'should create a MockTimers object': function(t) {
             var clock = qmock.mockTimers();
             t.assert(clock instanceof MockTimers);
+            t.done();
+        },
+
+        'should override timers with provided mocks': function(t) {
+            mockTimers.overrideTimers({
+                setImmediate: 1,
+                setTimeout: 2,
+            })
+            var si = setImmediate;
+            var st = setTimeout;
+            mockTimers.unmockTimers();
+            t.equal(si, 1);
+            t.equal(st, 2);
             t.done();
         },
 
@@ -267,6 +286,18 @@ module.exports = {
                 t.done();
             },
 
+            'timeout should have ref and unref methods': function(t) {
+                var timeout = setTimeout(function(){}, 1);
+                t.equal(typeof timeout.ref, 'function');
+                t.equal(typeof timeout.unref, 'function');
+                t.strictEqual(timeout.isRef, true);
+                timeout.unref();
+                t.strictEqual(timeout.isRef, false);
+                timeout.ref();
+                t.strictEqual(timeout.isRef, true);
+                t.done();
+            },
+
             'should clearTimeout': function(t) {
                 var called = false;
                 var task = setTimeout(function(){ called = true }, 1);
@@ -309,6 +340,13 @@ module.exports = {
             'should setInterval in clock': function(t) {
                 setInterval(function(){}, 1);
                 t.equal(this.clock.timeouts[1].length, 1);
+                t.done();
+            },
+
+            'interval should have ref and unref methods': function(t) {
+                var timeout = setTimeout(function(){}, 1);
+                t.equal(typeof timeout.ref, 'function');
+                t.equal(typeof timeout.unref, 'function');
                 t.done();
             },
 
