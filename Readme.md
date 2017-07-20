@@ -7,7 +7,8 @@ qmock
 Light-weight test double library for easier testing of dependency injection style
 code.  Patterned somewhat after `phpunit`, which looks like `junit` I believe.
 
-Can stub, spy, and mock classes, objects, the system timers, and http calls.
+Can [stub, spy](#stub-and-spy-api), and [mock classes, objects](#mock-objects-api), the
+[system timers](#mock-timers-api), and [http calls](#mock-http-api).
 
 `qmock` is testing framework agnostic; mocks can be used standalone.  They are
 integrated into the [`qnit`](https://npmjs.com/package/qnit) unit test runner.
