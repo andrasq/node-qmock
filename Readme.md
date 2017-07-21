@@ -469,6 +469,7 @@ Change Log
 - 0.1.0 - `stub()` and `mockTimers()`, initial `spy()`
 - 0.0.8 - Jan 2015 version
 
+
 Todo
 ----
 
@@ -487,3 +488,4 @@ Todo
   Could then pre-configure multiple different for the same query, each used just once.
   Add a `.reuse()` setting to tag which handlers to reuse, which to delete.
 - .when().timeout(ms) action to emulate a req timeout
+- fix: http.request keys off `path`, not pathname
