@@ -450,6 +450,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.6.6 - allow falsy timers to clearTimeout et al
 - 0.6.5 - stub `req.setTimeout`, intercept `request` even when called as a bare function
 - 0.6.4 - also test with node-v8, experimental server.throw action, match POST:, DEL: etc qualified urls or pathnames,
           stub req.sock.setTimeout, propagate uri.headers to req._headers

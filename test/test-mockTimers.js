@@ -249,6 +249,7 @@ module.exports = {
                 var called = false;
                 var task = setImmediate(function(){ called = true });
                 clearImmediate(task);
+                clearImmediate(null);
                 this.clock.tick(2);
                 t.ok(!called);
                 t.done();
@@ -302,6 +303,7 @@ module.exports = {
                 var called = false;
                 var task = setTimeout(function(){ called = true }, 1);
                 clearTimeout(task);
+                clearTimeout(null);
                 this.clock.tick(2);
                 t.ok(!called);
                 t.done();
@@ -381,6 +383,7 @@ module.exports = {
                 clock.tick(3);
                 t.equal(calls.length, 1);
                 clock.clearInterval(task);
+                clock.clearInterval(null);
                 clock.tick(3);
                 t.equal(calls.length, 1);
                 t.done();
