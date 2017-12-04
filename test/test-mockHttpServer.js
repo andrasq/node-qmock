@@ -7,7 +7,7 @@
 
 var http = require('http');
 var https = require('https');
-var assert = require('assert');
+var util = require('util');
 
 var qmock = require('../');
 var mockHttp = require('../lib/mockHttp');
@@ -59,7 +59,7 @@ module.exports = {
                 .when("http://localhost:1337/test/page")
                 .send(200, "It worked!", {'x-test-test': 'headers worked'});
 
-            var req = http.request({ hostname: 'localhost', port: 1337, pathname: '/test/page' }, function(res) {
+            var req = http.request({ hostname: 'localhost', port: 1337, path: '/test/page' }, function(res) {
                 res.resume();
                 res.on('end', function() {
                     t.done();
@@ -379,7 +379,7 @@ module.exports = {
             'should match by method and url string': function(t) {
                 var mock = qmock.mockHttp()
                     .when("POST:http://localhost:1337/test/call")
-                var uri = { method: 'POST', hostname: 'localhost', port: 1337, pathname: "/test/call" };
+                var uri = { method: 'POST', hostname: 'localhost', port: 1337, path: "/test/call" };
                 var req = http.request(uri, function(res){ t.done(); });
                 req.on('error', function(err) { t.done(err) });
                 req.end();
@@ -393,7 +393,7 @@ module.exports = {
             'should match by method and path string': function(t) {
                 var mock = qmock.mockHttp()
                     .when("POST:/test/call")
-                var uri = { method: 'POST', hostname: 'localhost', port: 1337, pathname: "/test/call" };
+                var uri = { method: 'POST', hostname: 'localhost', port: 1337, path: "/test/call?a=1" };
                 var req = http.request(uri, function(res){ t.done(); });
                 req.on('error', function(err) { t.done(err) });
                 req.end();
@@ -407,7 +407,7 @@ module.exports = {
             'should match by method and regex': function(t) {
                 var mock = qmock.mockHttp()
                     .when(/POST:.*test.call/)
-                var uri = { method: 'POST', hostname: 'localhost', port: 1337, pathname: "/test/call/yes/matched" };
+                var uri = { method: 'POST', hostname: 'localhost', port: 1337, path: "/test/call/yes/matched" };
                 var req = http.request(uri, function(res){
                     t.done();
                 });
@@ -582,32 +582,45 @@ module.exports = {
         'buildUrl': {
             'setUp': function(done) {
                 this.uri = {
+                    method: 'GET',
                     protocol: undefined,
                     hostname: 'localhost',
                     port: 1337,
-                    pathname: '/test/path',
+                    path: '/test/path',
                 };
                 done();
             },
 
-            'should build url with host and port': function(t) {
-                this.uri.protocol = null;
-                var url = mockHttpServer.MockServer.buildUrl(this.uri, "/path");
-                t.equal(url, "http://localhost:1337/path");
-                t.done();
-            },
+            'should build url form uri fields': function(t) {
+                var tests = [
+                    [ { },                                                      "http://localhost/" ],
+                    [ { host: 'somehost' },                                     "http://somehost/" ],
+                    [ { host: 'somehost', hostname: 'otherhost' },              "http://otherhost/" ],
+                    [ { hostname: 'somehost', port: 1337 },                     "http://somehost:1337/" ],
+                    [ { host: 'host', path: '/path/name' },                     "http://host/path/name" ],
+                    [ { hostname: 'host2', port: 1337, path: '/path/name' },    "http://host2:1337/path/name" ],
+                    [ { host: 'host3', port: 8888, protocol: 'https:' },        "https://host3:8888/" ],
+                    [ { host: 'host3', protocol: 'https:', path: '/page' },     "https://host3/page" ],
+                    [ { host: 'host4', query: 'a=1', search: '?a=1' },          "http://host4/" ],
+                    [ { host: 'host5', path: '/path/?a=1' },                    "http://host5/path" ],
+                    [ { host: 'host5', path: '/path' },                         "http://host5/path" ],
+                    [ { host: 'host5', path: '/path/?a=1' },                    "http://host5/path" ],
+                    [ { host: 'host5', path: '/path?a=1' },                     "http://host5/path" ],
+                    [ { host: 'host5', path: '/?a=1' },                         "http://host5/" ],
+                    [ { host: 'host5', path: '?a=1' },                          "http://host5/" ],
+                    [ { host: 'host5', hostname: 'host6', path: '/path?a=1' },  "http://host6/path" ],
+                ];
 
-            'should build url with host, port and protocol': function(t) {
-                this.uri.protocol = 'https:';
-                var url = mockHttpServer.MockServer.buildUrl(this.uri, "/some/path");
-                t.equal(url, "https://localhost:1337/some/path");
-                t.done();
-            },
+                // the fields used to make a request are method, protocol, host/hostname, port, path (default "http:// localhost :80 /")
+                // If both host and hostname are present, hostname takes precedence.  Pathname, query, search, hash do not participate.
 
-            'should build url with just host': function(t) {
-                this.uri.port = null;
-                var url = mockHttpServer.MockServer.buildUrl(this.uri, "/test/path");
-                t.equal(url, "http://localhost/test/path");
+                for (var i=0; i<tests.length; i++) {
+                    var uri = tests[i][0];
+                    var expect = tests[i][1];
+                    var url = mockHttpServer.MockServer.buildUrl(uri);
+                    t.equal(url, expect, util.format("tests[%d]: uri = %s", i, util.format(uri)));
+                }
+
                 t.done();
             },
         },

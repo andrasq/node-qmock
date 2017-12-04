@@ -450,6 +450,8 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.7.0 - breaking: fix mockHttpServer buildUrl and .when to build and test the same url nodejs does.
+          This means `uri.pathmame` is now ignored, which might break tests that depended on it.
 - 0.6.6 - allow falsy timers to clearTimeout et al
 - 0.6.5 - stub `req.setTimeout`, intercept `request` even when called as a bare function
 - 0.6.4 - also test with node-v8, experimental server.throw action, match POST:, DEL: etc qualified urls or pathnames,
@@ -490,3 +492,5 @@ Todo
   Add a `.reuse()` setting to tag which handlers to reuse, which to delete.
 - .when().timeout(ms) action to emulate a req timeout
 - fix: http.request keys off `path`, not pathname
+- todo: publish req._mockWrites, useful for debugging
+- todo: error out on write after end, to catch errors
