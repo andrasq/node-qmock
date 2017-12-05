@@ -167,6 +167,17 @@ module.exports = {
             t.done();
         },
 
+        'spy should spy on a function': function(t) {
+            var fn1 = function(){};
+            var spyFunc = qmock.spy(fn1);
+            spyFunc(12, 345);
+            t.equal(spyFunc.restore(), fn1);
+            t.equal(spyFunc.stub.callCount, 1);
+            t.equal(spyFunc.stub.callArguments[0], 12);
+            t.equal(spyFunc.stub.callArguments[1], 345);
+            t.done();
+        },
+
         'spy should default to 10 saved calls': function(t) {
             // without options
             var spy = qmock.spy();
@@ -284,13 +295,6 @@ module.exports = {
             object.method();
             t.equal(ncalls, 1);
             t.equal(object.method, fn);
-            t.done();
-        },
-
-        'spy should error out on restore of bare function': function(t) {
-            var spy = qmock.spy(function(){});
-            t.equal(typeof spy.restore, 'function');
-            t.throws(spy.restore);
             t.done();
         },
 
