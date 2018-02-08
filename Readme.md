@@ -451,7 +451,7 @@ This function can be called any time.
 Change Log
 ----------
 
-- 0.8.0 - make spy(func).restore() return func (not throw)
+- 0.8.0 - make spy(func).restore() return func (not throw), upgrade to mongoid-1.1.3
 - 0.7.0 - breaking: fix mockHttpServer buildUrl and .when to build and test the same url nodejs does.
           This means `uri.pathmame` is now ignored, which might break tests that depended on it.
 - 0.6.6 - allow falsy timers to clearTimeout et al
