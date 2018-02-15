@@ -8,6 +8,7 @@
 var http = require('http');
 var https = require('https');
 var assert = require('assert');
+var domain = require('domain');
 
 var QMock = require('../');
 var qmock = QMock;
@@ -403,6 +404,35 @@ module.exports = {
                         t.done();
                     })
                 }
+            },
+        },
+
+        'domains': {
+
+            'should call immediate in correct domain': function(t) {
+                var dom = domain.create();
+                var clock = qmock.mockTimers();
+                dom.run(function() {
+                    setImmediate(function() {
+                        t.equal(process.domain, dom);
+                        t.equal(domain.active, dom);
+                        t.done();
+                    })
+                })
+                clock.tick();
+            },
+
+            'should call timeout in correct domain': function(t) {
+                var dom = domain.create();
+                var clock = qmock.mockTimers();
+                dom.run(function() {
+                    setTimeout(function() {
+                        t.equal(process.domain, dom);
+                        t.equal(domain.active, dom);
+                        t.done();
+                    }, 1)
+                })
+                clock.tick();
             },
         },
     },
