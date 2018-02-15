@@ -360,12 +360,31 @@ routes.
 ### server.when( condition )
 
 Match the route against the condition.  If the route matches `condition`, the actions
-that follow will be run to generate the response for the route.
+that follow will be run to generate the response for the route.  Only the first matching
+condition will have its actions run.
 
 The `http.request` callback is called before the first matching action is run, and the
 `'end'` event is emitted when no more actions are left to run.  Note that because the
 actions that build the respones have not been run yet, the `res.statusCode` and other
 response fields may remain undefined until the res `'end'` event has been received.
+
+Conditions:
+
+- `string` - match the full url or the request pathname against the string
+- `METHOD:string` - match the full annotated url or annotated request pathname against the string,
+  The annotated url would look something like "POST:http://localhost:80/pathname".
+- `RegExp` - match the url or pathname against the regular expression
+- `function(req, res)` - use the given function to test whether the route matches
+
+Examples:
+
+    .when('http://localhost:80/')       - match any http request to localhost port 80
+    .when(/\/test\//)                   - match any request with "/test/" in its pathname
+    .when(/^POST:/)                     - match any POST request
+    .when(/^/)                          - match any request
+    .when(function(req, res) {          - match any request with Basic user:pass authorization
+        return (req._headers['authorization'].indexOf('Basic ') === 0);
+    })
 
 ### server.on( condition )
 
@@ -389,23 +408,12 @@ to the same request.  The matching actions are run in the order defined.
     // http.request('http://host/getNext') => 'data2', statusCode 200
     // http.request('http://host/getNext') => 'could not get more', statusCode 500
 
-Conditions:
+### server.default( )
 
-- `string` - match the full url or the request pathname against the string
-- `METHOD:string` - match the full annotated url or annotated request pathname against the string,
-  The annotated url would look something like "POST:http://localhost:80/pathname".
-- `RegExp` - match the url or pathname against the regular expression
-- `function(req, res)` - use the given function to test whether the route matches
-
-Examples:
-
-    .when('http://localhost:80/')       - match any http request to localhost port 80
-    .when(/\/test\//)                   - match any request with "/test/" in its pathname
-    .when(/^POST:/)                     - match any POST request
-    .when(/^/)                          - match any request
-    .when(function(req, res) {          - match any request with Basic user:pass authorization
-        return (req._headers['authorization'].indexOf('Basic ') === 0);
-    })
+An alias for a condition that always matches the route, equivalent to `.when(/.*/)`.
+Define a `default` as the very last condition, because conditions are tested in the
+order defined and the default always matches all routes and no other conditions will
+be tested.
 
 ### server.before( )
 
@@ -442,6 +450,8 @@ Set the response statusCode and headers.
 Invoke the provided callout, let it adjust `res`.
 
 ### server.delay( ms )
+
+Pause for `ms` milliseconds before continuing with the rest of the condition actions.
 
 ### server.emit( event, [arg1, arg2, ...] )
 
@@ -487,7 +497,7 @@ This function can be called any time.
 Change Log
 ----------
 
-- 0.8.0 - new `.on` and `.once` mockHttpServer commands, make spy(func).restore() return func (not throw), upgrade to mongoid-1.1.3
+- 0.8.0 - new `.on`, `.once` and `.default` mockHttpServer commands, make spy(func).restore() return func (not throw), upgrade to mongoid-1.1.3
 - 0.7.0 - breaking: fix mockHttpServer buildUrl and .when to build and test the same url nodejs does.
           This means `uri.pathmame` is now ignored, which might break tests that depended on it.
 - 0.6.6 - allow falsy timers to clearTimeout et al
@@ -523,11 +533,10 @@ Todo
 - clone un-enumerable properties as well, retaining their original definitions
 - `inherit()` and `disinherit()` calls: annotate the prototype (inherited properties) of the object,
   for e.g. `x = 3; inherit(x, 'a', 1); assert(x.a === 1)`
-- mockHttp() needs a `when('default')` clause and a `makeRequest()` action
-  ('default' is easier to read than a match-all regex eg `/^/`)
 - .when().timeout(ms) action to emulate a req timeout
 - todo: publish req._mockWrites, useful for debugging
 - todo: error out on write after end, to catch errors
 - todo: stub().throws(string or Error) - always throw
 - todo: stub().returns(value) - always return value
 - todo: stub().callsBack(err, value) - always return value to callback
+- could use a `makeRequest()` mockHttp action to return an actual http request
