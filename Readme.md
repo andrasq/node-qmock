@@ -367,6 +367,28 @@ The `http.request` callback is called before the first matching action is run, a
 actions that build the respones have not been run yet, the `res.statusCode` and other
 response fields may remain undefined until the res `'end'` event has been received.
 
+### server.on( condition )
+
+An alias for `server.when`.
+
+### server.once( condition )
+
+Like `server.when`, but the condition will be matched only once.  After the first match,
+it will not match any other request.  This allows the mock to return different responses
+to the same request.  The matching actions are run in the order defined.
+
+    qmock.mockHttp()
+        .once('http://host/getNext')
+          .send(200, 'data1')
+        .once('http://host/getNext')
+          .send(200, 'data2')
+        .once('http://host/getNext')
+          .send(500, 'could not get more');
+
+    // http.request('http://host/getNext') => 'data1', statusCode 200
+    // http.request('http://host/getNext') => 'data2', statusCode 200
+    // http.request('http://host/getNext') => 'could not get more', statusCode 500
+
 Conditions:
 
 - `string` - match the full url or the request pathname against the string
@@ -397,13 +419,27 @@ Actions:
 
 ### server.send( [statusCode], [responseBody], [responseHeaders] )
 
+Set the response `statusCode` and `responseHeaders`, write the `responseBody`, and
+finish the response.  No more data should be written after the response has been
+finished.
+
+### server.send( responseFunction(req, res, next) )
+
+Call the provided `responseFunction` to generate the response.
+
 ### server.write( responseBodyChunk )
 
+Cause `res` to emit a `'data'` event with the given chunk.
+
 ### server.writeHead( [statusCode], [responseHeaders] )
+
+Set the response statusCode and headers.
 
 ### server.end( [statusCode], [responseBody] )
 
 ### server.compute( callback(req, res, next) )
+
+Invoke the provided callout, let it adjust `res`.
 
 ### server.delay( ms )
 
@@ -451,7 +487,7 @@ This function can be called any time.
 Change Log
 ----------
 
-- 0.8.0 - make spy(func).restore() return func (not throw), upgrade to mongoid-1.1.3
+- 0.8.0 - new `.on` and `.once` mockHttpServer commands, make spy(func).restore() return func (not throw), upgrade to mongoid-1.1.3
 - 0.7.0 - breaking: fix mockHttpServer buildUrl and .when to build and test the same url nodejs does.
           This means `uri.pathmame` is now ignored, which might break tests that depended on it.
 - 0.6.6 - allow falsy timers to clearTimeout et al
@@ -489,10 +525,9 @@ Todo
   for e.g. `x = 3; inherit(x, 'a', 1); assert(x.a === 1)`
 - mockHttp() needs a `when('default')` clause and a `makeRequest()` action
   ('default' is easier to read than a match-all regex eg `/^/`)
-- make mockHttpServer server.when matches be use-once, deleted once consumed.
-  Could then pre-configure multiple different for the same query, each used just once.
-  Add a `.reuse()` setting to tag which handlers to reuse, which to delete.
 - .when().timeout(ms) action to emulate a req timeout
-- fix: http.request keys off `path`, not pathname
 - todo: publish req._mockWrites, useful for debugging
 - todo: error out on write after end, to catch errors
+- todo: stub().throws(string or Error) - always throw
+- todo: stub().returns(value) - always return value
+- todo: stub().callsBack(err, value) - always return value to callback

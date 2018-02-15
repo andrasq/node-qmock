@@ -68,6 +68,48 @@ module.exports = {
             req.end();
         },
 
+        'should respond with on': function(t) {
+            var mock = qmock.mockHttp()
+                .on("http://somehost/some/path")
+                .send(200, "some response");
+
+            var req = http.request({ hostname: 'somehost', path: '/some/path' }, function(res) {
+                var body = "";
+                res.on('data', function(chunk) { body += chunk });
+                res.on('end', function() {
+                    t.equal(body, "some response");
+                    t.done();
+                })
+            })
+            req.end();
+        },
+
+        'should respond once': function(t) {
+            var mock = qmock.mockHttp()
+                .once("http://somehost/some/path")
+                    .send(200, "some response")
+                .once("http://somehost/some/path")
+                    .send(200, "other response");
+
+            var req = http.request({ hostname: 'somehost', path: '/some/path' }, function(res) {
+                var body = "";
+                res.on('data', function(chunk) { body += chunk });
+                res.on('end', function() {
+                    t.equal(body, "some response");
+                    var req2 = http.request({ hostname: 'somehost', path: '/some/path' }, function(res) {
+                        var body = "";
+                        res.on('data', function(chunk) { body += chunk });
+                        res.on('end', function() {
+                            t.equal(body, "other response");
+                            t.done();
+                        })
+                    })
+                    req2.end();
+                })
+            })
+            req.end();
+        },
+
         'send and write': {
 
             'send should set statusCode and response body': function(t) {
