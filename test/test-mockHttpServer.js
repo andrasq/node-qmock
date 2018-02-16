@@ -438,10 +438,10 @@ module.exports = {
 
             'should respond with on': function(t) {
                 var mock = qmock.mockHttp()
-                    .on("http://somehost/some/path")
+                    .on("http://somehost:80/some/path")
                     .send(200, "some response");
 
-                var req = http.request({ hostname: 'somehost', path: '/some/path' }, function(res) {
+                var req = http.request({ host: 'somehost', port: 80, path: '/some/path' }, function(res) {
                     var body = "";
                     res.on('data', function(chunk) { body += chunk });
                     res.on('end', function() {
@@ -452,21 +452,21 @@ module.exports = {
                 req.end();
             },
 
-            'should respond once': function(t) {
+            'should respond with once': function(t) {
                 var mock = qmock.mockHttp()
-                    .once("http://somehost/some/path")
+                    .once("http://somehost:80/some/path")
                         .send(200, "some response")
-                    .once("http://somehost/some/path")
+                    .once("http://somehost:80/some/path")
                         .send(200, "other response")
                     .default()
                       .write('default response');
 
-                var req = http.request({ hostname: 'somehost', path: '/some/path' }, function(res) {
+                var req = http.request({ host: 'somehost', port: 80, path: '/some/path' }, function(res) {
                     var body = "";
                     res.on('data', function(chunk) { body += chunk });
                     res.on('end', function() {
                         t.equal(body, "some response");
-                        var req2 = http.request({ hostname: 'somehost', path: '/some/path' }, function(res) {
+                        var req2 = http.request({ host: 'somehost', port: 80, path: '/some/path' }, function(res) {
                             var body = "";
                             res.on('data', function(chunk) { body += chunk });
                             res.on('end', function() {
