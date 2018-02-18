@@ -412,7 +412,7 @@ to the same request.  The matching actions are run in the order defined.
 
 An alias for a condition that always matches the route, equivalent to `.when(/.*/)`.
 Define a `default` as the very last condition, because conditions are tested in the
-order defined and the default always matches all routes and no other conditions will
+order defined and the default always matches all routes so no other conditions will
 be tested.
 
 ### server.before( )
