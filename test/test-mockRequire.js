@@ -132,9 +132,14 @@ function findCachedModule( name, children ) {
         children = root.children;
     }
 
+    var mod;
+    if (children._qmock_visited) return;
+    children._qmock_visited = true;
     for (var i=0; i<children.length; i++) {
         if (children[i].filename === path) return children[i];
-        var mod = findCachedModule(name, children[i].children);
-        if (mod) return mod;
+        mod = findCachedModule(name, children[i].children);
+        if (mod) break;
     }
+    delete children._qmock_visited;
+    return mod;
 }
