@@ -15,7 +15,7 @@ module.exports = {
 
     tearDown: function(done) {
         mockRequire.unmockRequire();
-        mockRequire.reset();
+        mockRequire.unmockRequire();
         done();
     },
 
@@ -112,11 +112,29 @@ module.exports = {
 
     'unrequire': {
         'should remove all instances of the module': function(t) {
-            var url = require('url');
-            delete require.cache[require.resolve('url')];
-            require('url');
-            mockRequire.unrequire('url');
+            var url = require('../package');
+            var mod = findCachedModule('../package');
+            mockRequire.unrequire('../package');
+            var mod2 = findCachedModule('../package');
+            t.equal(mod.exports, url);
+            t.equal(mod2, undefined);
             t.done();
         },
     },
+}
+
+function findCachedModule( name, children ) {
+    var root, path = require.resolve(name);
+
+    if (!children) {
+        root = module;
+        while (root.parent) root = root.parent;
+        children = root.children;
+    }
+
+    for (var i=0; i<children.length; i++) {
+        if (children[i].filename === path) return children[i];
+        var mod = findCachedModule(name, children[i].children);
+        if (mod) return mod;
+    }
 }

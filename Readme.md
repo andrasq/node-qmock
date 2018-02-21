@@ -319,17 +319,19 @@ for the named modules.
 ## qmock.mockRequire( moduleName, replacement )
 
 Arrange for `require` of `moduleName` to return `replacement` in all sources,
-even if `moduleName` has been loaded previously.
+even if `moduleName` had been loaded previously.  Calls to `mockRequire` are
+cumulative, each one defines one more module that will be mocked.
 
 It is an error for `moduleName` to be falsy.
 
 ## qmock.unmockRequre( [moduleName] )
 
 If `moduleName` is provided, arrange for `require` of `moduleName` to load
-the actual module and not the replacement value.
+the actual module and not the mock replacement value.
 
 Without a module name, uninstall the mock require hooks and restore the
-original unmodified system `require` functionality.
+original unmodified system `require` functionality.  All previously defined
+module mocks are cleared.
 
 ## qmock.unrequire( moduleName )
 
