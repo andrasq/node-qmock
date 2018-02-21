@@ -8,7 +8,7 @@ Light-weight test double library for easier testing of dependency injection styl
 code.  Patterned somewhat after `phpunit`, which looks like `junit` I believe.
 
 Can [stub, spy](#stub-and-spy-api), and [mock classes, objects](#mock-objects-api), the
-[system timers](#mock-timers-api), and [http calls](#mock-http-api).
+[system timers](#mock-timers-api), [`require()`](#mock-require-api) and [http calls](#mock-http-api).
 
 `qmock` is testing framework agnostic; mocks can be used standalone.  They are
 integrated into the [`qnit`](https://npmjs.com/package/qnit) unit test runner.
@@ -310,6 +310,34 @@ original nodejs versions.  Can be called any time.  Note that any pending timeou
 in the mock timers can still be triggered with `clock.tick()`.
 
 
+Mock Require API
+----------------
+
+`mockRequire` overrides `require` everywhere to return the mock value
+for the named modules.
+
+## qmock.mockRequire( moduleName, replacement )
+
+Arrange for `require` of `moduleName` to return `replacement` in all sources,
+even if `moduleName` has been loaded previously.
+
+It is an error for `moduleName` to be falsy.
+
+## qmock.unmockRequre( [moduleName] )
+
+If `moduleName` is provided, arrange for `require` of `moduleName` to load
+the actual module and not the replacement value.
+
+Without a module name, uninstall the mock require hooks and restore the
+original unmodified system `require` functionality.
+
+## qmock.unrequire( moduleName )
+
+Helper function to restore the system to the state it was in before
+the named module was ever `require`-d.  It deletes all cached copies of the
+module from `require.cache`, `module.children`, `module.parent.children` etc.
+
+
 Mock Http API
 -------------
 
@@ -451,6 +479,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.9.0 - new `mockRequire()` functionality
 - 0.8.0 - make spy(func).restore() return func (not throw)
 - 0.7.0 - breaking: fix mockHttpServer buildUrl and .when to build and test the same url nodejs does.
           This means `uri.pathmame` is now ignored, which might break tests that depended on it.

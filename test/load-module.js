@@ -1,6 +1,6 @@
-if (process.argv[1].indexOf('qnit') >= 0) return;
+if (!process.env.NODE_NESTED) return;
 
 module.exports = {
-    crypto: require('crypto'),
+    url: require('url'),
     load: function( name ) { return require(name) },
 }
