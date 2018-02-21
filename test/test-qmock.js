@@ -14,6 +14,7 @@ var qmock = QMock;
 var mockHttp = require('../lib/mockHttp');
 var mockTimers = require('../lib/mockTimers');
 var MockTimers = mockTimers.MockTimers;
+var mockRequire = require('../lib/mockRequire');
 
 module.exports = {
     setUp: function(done) {
@@ -183,6 +184,7 @@ module.exports = {
             var decoratedMethods = [
                 'getMock', 'getMockSkipConstructor',
                 'stub', 'spy', 'mockTimers', 'unmockTimers', 'mockHttp', 'unmockHttp',
+                'mockRequire', 'unmockRequire', 'unrequire',
             ];
             for (var i=0; i<decoratedMethods.length; i++) {
                 var method = decoratedMethods[i];
@@ -273,6 +275,16 @@ module.exports = {
         'expects should accept exact count values': function(t) {
             var i;
             for (i=-1; i<20; i++) t.equal(i, QMock.getMock({}).expects(i).expectedCount);
+            t.done();
+        },
+
+        'expects should default to any': function(t) {
+            t.equal(QMock.getMock({}).expects().expectedCount, QMock.any());
+            t.done();
+        },
+
+        'expects should throw if count not recognized': function(t) {
+            t.throws(function(){ QMock.getMock({}).expects('seventy-seven') }, /unrecognized count/);
             t.done();
         },
 
