@@ -34,6 +34,21 @@ module.exports = {
         t.done();
     },
 
+    'should mock module by handler': function(t) {
+        mockRequire.mockRequireStub('url', function(name) { return 123 });
+        t.equal(require('url'), 123);
+
+        mockRequire.mockRequireStub('url', function(name) { throw new Error('load error') });
+        t.throws(function() { require('url') }, /load error/);
+
+        t.throws(function() { mockRequire.mockRequireStub('mod2') }, /handler required/);
+
+        mockRequire.unmockRequire('url');
+        t.equal(typeof require('url'), 'object');
+
+        t.done();
+    },
+
     'should layer additional mocked modules': function(t) {
         mockRequire.mockRequire('mod1', 'other1');
         mockRequire.mockRequire('mod2', 'other2');

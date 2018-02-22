@@ -324,7 +324,12 @@ cumulative, each one defines one more module that will be mocked.
 
 It is an error for `moduleName` to be falsy.
 
-## qmock.unmockRequre( [moduleName] )
+## qmock.mockRequireStub( moduleName, handler )
+
+Stub `require` of `moduleName` with the provided handler function, and return the
+value it computes.  Handler is invoked as `handler(moduleName)`.
+
+## qmock.unmockRequire( [moduleName] )
 
 If `moduleName` is provided, arrange for `require` of `moduleName` to load
 the actual module and not the mock replacement value.
