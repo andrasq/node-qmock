@@ -184,7 +184,7 @@ module.exports = {
             var decoratedMethods = [
                 'getMock', 'getMockSkipConstructor',
                 'stub', 'spy', 'mockTimers', 'unmockTimers', 'mockHttp', 'unmockHttp',
-                'mockRequire', 'unmockRequire', 'unrequire',
+                'mockRequire', 'mockRequireStub', 'unmockRequire', 'unrequire',
             ];
             for (var i=0; i<decoratedMethods.length; i++) {
                 var method = decoratedMethods[i];
