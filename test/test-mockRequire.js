@@ -116,6 +116,7 @@ module.exports = {
     'should override modules in other modules too': function(t) {
         process.env.NODE_NESTED = 1;
         mockRequire.mockRequire('url', 'other2');
+        mockRequire.unrequire(__dirname + '/load-module');
         var mod = require(__dirname + '/load-module');
         var mod2 = mod.load('url');
         var mod3 = mod.load('dns');
@@ -147,12 +148,14 @@ function findCachedModule( name, children ) {
         children = root.children;
     }
 
-    var mod;
+    // avoid cycles
     if (children._qmock_visited) return;
+
+    var mod;
     children._qmock_visited = true;
     for (var i=0; i<children.length; i++) {
-        if (children[i].filename === path) return children[i];
-        mod = findCachedModule(name, children[i].children);
+        if (children[i].filename === path) mod = children[i];
+        else mod = findCachedModule(name, children[i].children);
         if (mod) break;
     }
     delete children._qmock_visited;
