@@ -29,13 +29,21 @@ module.exports = {
         'stub should create an anonymous stub': function(t) {
             var stub = qmock.stub();
             t.equal(typeof stub, 'function');
-            t.equal(typeof stub.stub, 'object');
-            t.equal(stub.stub._saveLimit, 0);
+            t.equal(stub.stub, stub);
+            t.equal(stub.stub._saveLimit, 3);
 
             var stub2 = qmock.stub(null, function(){});
             t.equal(typeof stub2, 'function');
-            t.equal(typeof stub2.stub, 'object');
-            t.equal(stub2.stub._saveLimit, 0);
+            t.equal(stub2.stub, stub2);
+            t.equal(stub2.stub._saveLimit, 3);
+
+            var obj = {};
+            var stub3 = qmock.stub(obj, 'fn');
+            t.equal(typeof stub3, 'function');
+            t.equal(obj.fn, stub3);
+            obj.fn();
+            stub3();
+            t.equal(stub3.callCount, 2);
 
             t.done();
         },
@@ -161,6 +169,13 @@ module.exports = {
             }
         },
 
+        'spy should create an anonymous func': function(t) {
+            var spy = qmock.spy();
+            t.equal(typeof spy, 'function');
+            t.equal(spy.stub, spy);
+            t.done();
+        },
+
         'spy should reject a non-function': function(t) {
             t.throws(function(){ qmock.spy(123); })
             t.throws(function(){ qmock.spy({}); })
@@ -175,6 +190,46 @@ module.exports = {
             t.equal(spyFunc.stub.callCount, 1);
             t.equal(spyFunc.stub.callArguments[0], 12);
             t.equal(spyFunc.stub.callArguments[1], 345);
+            t.done();
+        },
+
+        'restore should return the function': function(t) {
+            var ncalls = 0;
+            var fn = function(){ ncalls += 1 };
+            var obj = { fn: fn };
+
+            var spy = qmock.stub();
+            t.equal(spy.restore(), undefined);
+
+            var spy = qmock.spy();
+            t.equal(spy.restore(), undefined);
+
+            var spy = qmock.stub(fn);
+            spy();
+            t.equal(spy.callCount, 1);
+            t.equal(ncalls, 0);
+            t.equal(spy.restore(), fn);
+
+            var spy = qmock.stub(obj, 'fn');
+            obj.fn();
+            t.equal(spy.callCount, 1);
+            t.equal(ncalls, 0);
+            t.equal(spy.restore(), fn);
+
+            var spy = qmock.spy(fn);
+            spy();
+            t.equal(spy.callCount, 1);
+            t.equal(ncalls, 1);
+            t.equal(spy.restore(), fn);
+            t.equal(obj.fn, fn);
+
+            var spy = qmock.spy(obj, 'fn');
+            obj.fn();
+            t.equal(spy.callCount, 1);
+            t.equal(ncalls, 2);
+            t.equal(spy.restore(), fn);
+            t.equal(obj.fn, fn);
+
             t.done();
         },
 
@@ -287,11 +342,12 @@ module.exports = {
             var fn = function() {};
             var object = { method: fn };
             var ncalls = 0;
-            qmock.spy(object, 'method', function() {
+            var spy = qmock.spy(object, 'method', function() {
                 ncalls += 1;
             });
             object.method();
-            object.method.restore();
+            var fn2 = spy.restore();
+            t.equal(fn2, fn);
             object.method();
             t.equal(ncalls, 1);
             t.equal(object.method, fn);
@@ -352,6 +408,8 @@ module.exports = {
             t.equal(spy.callCount, 1);
             t.deepEqual(spy.callArguments, [11]);
             t.done();
+
+            // TODO: test spyOnce with a callback (to make sure stats are updated when callback is run)
         },
 
         'should spyOnce even if it throws': function(t) {

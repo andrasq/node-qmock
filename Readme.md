@@ -84,7 +84,12 @@ functional methods annotated with instrumentation.  Their functionality overlaps
 
 ## qmock.stub( )
 
-With no arguments, returns an instrumented anonymous stub function like `qmock.spy()`.
+With no arguments, returns an instrumented anonymous function like `qmock.spy()`.
+
+## qmock.stub( func )
+
+Return an instrumented anonymous function that will invoke `func`.  `restore()` returns
+the original `func`.
 
 ## qmock.stub( object, methodName [,overrideFunction] )
 
@@ -133,6 +138,7 @@ stub, so the callback arguments may not be from the most recent call.
 
 Remove the stub and restore the original method back onto the object.
 Bare functions cannot be restored, only object methods can.
+Returns the original spied-on or stubbed method.
 
 Example:
 
@@ -532,6 +538,10 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.10.0 - save 3 results in stub(), always return a function from spy() and stub(), make restore() return the original func,
+           make spied stats accessible on the returned spy itself in addition to spy.stub
+- 0.9.3 - fix unrequire to tolerate corrupted require.cache vs module.children
+- 0.9.2 - add `mockRequireStub`
 - 0.9.0 - new `mockRequire()` functionality
 - 0.8.0 - new `.on`, `.once` and `.default` mockHttpServer commands, make spy(func).restore() return func (not throw), upgrade to mongoid-1.1.3
 - 0.7.0 - breaking: fix mockHttpServer buildUrl and .when to build and test the same url nodejs does.
