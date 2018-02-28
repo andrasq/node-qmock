@@ -8,6 +8,7 @@
 var http = require('http');
 var https = require('https');
 var assert = require('assert');
+var util = require('util');
 
 var QMock = require('../');
 var qmock = QMock;
@@ -83,6 +84,59 @@ module.exports = {
             t.equal(stub.callResult, 123);
             t.deepEqual(called, [3, 7]);
             t.done();
+        },
+
+        'on a function': {
+            'stub should stub': function(t) {
+                var called;
+                var fn = function(){ called = true };
+                var stub = qmock.stub(fn);
+                stub();
+                t.ok(!called);
+                t.ok(stub.called);
+                t.equal(stub.callCount, 1);
+                t.equal(stub.restore(), fn);
+                t.done();
+            },
+
+            'should stub a named method': function(t) {
+                var called;
+                var fn = function(){ called = 1 };
+                var fn2 = fn.fn = function(){ called = 2 };
+                var stub = qmock.stub(fn, 'fn');
+                fn.fn();
+                t.ok(!called);
+                t.ok(stub.called);
+                t.equal(stub.callCount, 1);
+                t.equal(stub.restore(), fn2);
+                t.done();
+            },
+
+            'should stub a function with an override': function(t) {
+                var called;
+                var fn = function(){ called = 1 };
+                var stub = qmock.stub(fn, function(){ called = 2 });
+                stub();
+                t.ok(called == 2);
+                t.ok(stub.called);
+                t.equal(stub.callCount, 1);
+                t.equal(stub.restore(), fn);
+                t.done();
+            },
+
+            'should stub a named method with an override': function(t) {
+                var called;
+                var fn = function(){};
+                var fn2 = fn.fn = function(){ called = true };
+                var stub = qmock.stub(fn, 'fn', function(){ called = 3 });
+                fn();
+                fn.fn();
+                t.ok(called == 3);
+                t.ok(stub.called);
+                t.equal(stub.callCount, 1);
+                t.equal(stub.restore(), fn2);
+                t.done();
+            },
         },
 
         'stub should restore override': function(t) {
@@ -167,6 +221,29 @@ module.exports = {
                 t.equal(stub.callCallbackError, myError);
                 t.done();
             }
+        },
+
+        'stub should default to 3 saved calls': function(t) {
+            // without options
+            var stub;
+            stub = qmock.stub();
+            t.equal(stub.stub._saveLimit, 3);
+            stub = qmock.stub(function(){});
+            t.equal(stub.stub._saveLimit, 3);
+            stub = qmock.stub({ fn: function(){} }, 'fn');
+            t.equal(stub.stub._saveLimit, 3);
+            stub = qmock.stub({ fn: function(){} }, 'fn', function(){});
+            t.equal(stub.stub._saveLimit, 3);
+
+            // not included in options
+            stub = qmock.stub(null, null, {});
+            t.equal(stub.stub._saveLimit, 3);
+            var stub = qmock.stub({fn: function(){}}, 'fn', {});
+            t.equal(stub.stub._saveLimit, 3);
+            var stub = qmock.stub({fn: function(){}}, 'fn', function(){}, {});
+            t.equal(stub.stub._saveLimit, 3);
+
+            t.done();
         },
 
         'spy should create an anonymous func': function(t) {

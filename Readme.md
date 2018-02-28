@@ -538,6 +538,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.10.1 - fix stubbing a method on a function
 - 0.10.0 - save 3 results in stub(), always return a function from spy() and stub(), make restore() return the original func,
            make spied stats accessible on the returned spy itself in addition to spy.stub
 - 0.9.3 - fix unrequire to tolerate corrupted require.cache vs module.children
