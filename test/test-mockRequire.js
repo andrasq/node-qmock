@@ -9,7 +9,7 @@ var mockRequire = require('../lib/mockRequire');
 
 module.exports = {
     before: function(done) {
-        mockRequire.unrequire(__dirname + '/load-module');
+        mockRequire.unrequire('./load-module');
         done();
     },
 
@@ -116,12 +116,11 @@ module.exports = {
     'should override modules in other modules too': function(t) {
         process.env.NODE_NESTED = 1;
         mockRequire.mockRequire('url', 'other2');
-        mockRequire.unrequire(__dirname + '/load-module');
-        var mod = require(__dirname + '/load-module');
-        var mod2 = mod.load('url');
-        var mod3 = mod.load('dns');
-        t.equal(mod2, 'other2');
-        t.equal(typeof mod3, 'object');
+        mockRequire.unrequire('./load-module');
+        var mod = require('./load-module');
+        t.equal(mod.url, 'other2');
+        t.equal(mod.load('url'), 'other2');
+        t.equal(typeof mod.load('dns'), 'object');
         delete process.env.NODE_NESTED;
         t.done();
     },
@@ -134,6 +133,38 @@ module.exports = {
             var mod2 = findCachedModule('../package');
             t.equal(mod.exports, url);
             t.equal(mod2, undefined);
+            t.done();
+        },
+
+        'should remove module when called as a function': function(t) {
+            var unrequire2 = mockRequire.unrequire;
+            require('../package');
+            t.notEqual(findCachedModule('../package'), null);
+            unrequire2('../package');
+            t.equal(findCachedModule('../package'), null);
+            t.done();
+        },
+
+        'should remove module when attached to another object': function(t) {
+            var unrequire3 = { unrequire: mockRequire.unrequire };
+            require('../package');
+            t.notEqual(findCachedModule('../package'), null);
+            unrequire3.unrequire('../package');
+            t.equal(findCachedModule('../package'), null);
+            t.done();
+        },
+
+        'should remove module by absolute filepath': function(t) {
+            require('../package');
+            t.ok(findCachedModule('../package'));
+            mockRequire.unrequire(require.resolve('../package'));
+            t.ok(!findCachedModule('../package'));
+
+            require('./load-module');
+            t.ok(findCachedModule('./load-module'));
+            mockRequire.unrequire('./load-module');
+            t.ok(!findCachedModule('./load-module'));
+
             t.done();
         },
     },
