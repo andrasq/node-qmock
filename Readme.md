@@ -394,6 +394,9 @@ Example
 
 Experimental.
 
+`qmock.mockHttp` mimics `http[s].request` in enough detail to test not just
+applications making web requests but framework implementations.
+
 Without arguments, `mockHttp` mocks an http server, and returns the mock server
 object.  The mock server has methods to recognize and respond to calls to mocked
 routes.
@@ -485,6 +488,8 @@ Cause `res` to emit a `'data'` event with the given chunk.
 Set the response statusCode and headers.
 
 ### server.end( [statusCode], [responseBody] )
+
+Same as `send`:  set the statusCode, write the reply and finish the response.
 
 ### server.compute( callback(req, res, next) )
 
@@ -588,3 +593,4 @@ Todo
 - todo: stub().returns(value) - always return value
 - todo: stub().callsBack(err, value) - always return value to callback
 - could use a `makeRequest()` mockHttp action to return an actual http request
+- fix callArgs to save user-passed callback func, not the interceptor
