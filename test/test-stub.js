@@ -179,8 +179,8 @@ module.exports = {
         'stub.yields should throw and call back next tick': function(t) {
             var called;
             var cb = function(a, b, c){ called = [a, b, c] };
-            var spy = qmock.stub(function(){}).yields(1, 2).throws(new Error('test error'));
-            t.throws(function(){ spy(11, 12, cb, 13) }, /test error/);
+            var spy = qmock.stub(function(){}).yields(1, 2).throws(1234);
+            t.throws(function(){ spy(11, 12, cb, 13) }, /1234/);
             t.ok(spy.called);
             t.deepEqual(spy.args[0].slice(0, 2), [11, 12]);
             setImmediate(function() {
