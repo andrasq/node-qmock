@@ -709,5 +709,17 @@ module.exports = {
             t.equal(spy.getCall(1).exception, 4444);
             t.done();
         },
+
+        'callsBefore and callsAfter should reflect call order': function(t) {
+            var spy1 = qmock.stub();
+            var spy2 = qmock.stub();
+            t.ok(!spy1.calledBefore(spy2) && !spy1.calledAfter(spy2));
+            spy1();
+            spy2();
+            t.ok(spy1.calledBefore(spy2) && spy2.calledAfter(spy1));
+            spy1();
+            t.ok(spy2.calledBefore(spy1) && spy1.calledAfter(spy2));
+            t.done();
+        }
     },
 };
