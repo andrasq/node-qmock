@@ -145,6 +145,50 @@ module.exports = {
             t.done();
         },
 
+        'stub.returns should return value': function(t) {
+            var spy = qmock.stub().returns(12345);
+            t.equal(spy(), 12345);
+            t.equal(spy(), 12345);
+            var spy = qmock.stub().returns(12345);
+            t.equal(spy(), 12345);
+            t.done();
+        },
+
+        'stub.throws should throw': function(t) {
+            var spy = qmock.stub().throws(new Error('test error 1234'));
+            t.throws(function(){ spy() }, /test error 1234/);
+            t.throws(function(){ spy() }, /test error 1234/);
+            var spy = qmock.spy().throws(new Error('test error 345'));
+            t.throws(function(){ spy() }, /test error 345/);
+            t.done();
+        },
+
+        'stub.yields should return and call back immediately': function(t) {
+            var called;
+            var cb = function(a, b, c){ called = [a, b, c] };
+            var spy = qmock.stub(function(){}).yields(1, 2).returns(1234);
+            var ret = spy(11, 12, cb, 13);
+            t.ok(spy.called);
+            t.deepEqual(spy.args[0].slice(0, 2), [11, 12]);
+            t.ok(called);
+            t.deepEqual(called, [1, 2, undefined]);
+            t.equal(ret, 1234);
+            t.done();
+        },
+
+        'stub.yields should throw and call back next tick': function(t) {
+            var called;
+            var cb = function(a, b, c){ called = [a, b, c] };
+            var spy = qmock.stub(function(){}).yields(1, 2).throws(new Error('test error'));
+            t.throws(function(){ spy(11, 12, cb, 13) }, /test error/);
+            t.ok(spy.called);
+            t.deepEqual(spy.args[0].slice(0, 2), [11, 12]);
+            setImmediate(function() {
+                t.deepEqual(called, [1, 2, undefined]);
+                t.done();
+            });
+        },
+
         'on a function': {
             'stub should stub': function(t) {
                 var called;
@@ -589,6 +633,80 @@ module.exports = {
                 t.deepEqual(spy.callArguments, [1]);
                 t.equal(spy.error, error);
             }
+            t.done();
+        },
+
+        'stub.returnsOnce should return once': function(t) {
+            var stub = qmock.stub().returns(1).returnsOnce(2).returnsOnce(3);
+            t.equal(stub(), 2);
+            t.equal(stub(), 3);
+            t.equal(stub(), 1);
+            t.equal(stub(), 1);
+            t.done();
+        },
+
+        'stub.yieldsOnce should yield once': function(t) {
+            var stub = qmock.stub().yields(1, 2).yieldsOnce(2, 3).yieldsOnce(3, 4);
+            t.expect(8);
+            stub(function(a, b) { t.equal(a, 2); t.equal(b, 3); }, 20, 30);
+            stub(10, function(a, b) { t.equal(a, 3); t.equal(b, 4); }, 30);
+            stub(10, 20, function(a, b) { t.equal(a, 1); t.equal(b, 2); });
+            stub(10, 20, function(a, b) { t.equal(a, 1); t.equal(b, 2); });
+            t.done();
+        },
+
+        'stub.throwsOnce should throw once': function(t) {
+            var stub = qmock.stub().throws(new Error("error one")).throwsOnce(new Error("error two")).throwsOnce(new Error("error three"));
+            t.throws(function(){ stub() }, /error two/);
+            t.throws(function(){ stub() }, /error three/);
+            t.throws(function(){ stub() }, /error one/);
+            t.throws(function(){ stub() }, /error one/);
+            t.done();
+        },
+
+        'stub._mockOnce yields should require an array': function(t) {
+            t.ok(qmock.stub()._mockOnce());
+            t.ok(qmock.stub()._mockOnce(null));
+            t.ok(qmock.stub()._mockOnce(null, null));
+            t.ok(qmock.stub()._mockOnce(null, null, null));
+            t.ok(qmock.stub()._mockOnce(null, null, []));
+            t.throws(function(){ qmock.stub()._mockOnce(null, null, 1) });
+            t.throws(function(){ qmock.stub()._mockOnce(null, null, false) });
+            t.done();
+        },
+
+        'getCall should return info about function call': function(t) {
+            var spy = qmock.stub().returnsOnce(11).returnsOnce(12).throwsOnce(13);
+            spy(1);
+            spy(2, 3);
+            try { spy() } catch (e) { }
+
+            var call0 = spy.getCall(0);
+            t.deepEqual(call0.args, [1]);
+            t.deepEqual(call0.returnValue, 11);
+
+            var call1 = spy.getCall(1);
+            t.deepEqual(call1.args, [2, 3]);
+            t.deepEqual(call1.returnValue, 12);
+
+            var call2 = spy.getCall(2);
+            t.deepEqual(call2.args, []);
+            t.deepEqual(call2.returnValue, undefined);
+            t.deepEqual(call2.exception, 13);
+
+            t.done();
+        },
+
+        'getCall should return info about method call': function(t) {
+            var obj = { fn: function(){ return 7 }  };
+            var spy = qmock.spy(obj, 'fn').returnsOnce(123).throwsOnce(4444);
+
+            obj.fn(1, 2);
+            try { obj.fn() } catch (e) { }
+            t.deepEqual(spy.getCall(0).args, [1, 2]);
+            t.equal(spy.getCall(0).returnValue, 123);
+            t.equal(spy.getCall(0).this, obj);
+            t.equal(spy.getCall(1).exception, 4444);
             t.done();
         },
     },
