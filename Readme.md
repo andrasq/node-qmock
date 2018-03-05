@@ -82,16 +82,16 @@ Stub and Spy API
 Stubs are stand-in methods that track and instrument calls.  Spies are fully
 functional methods annotated with instrumentation.  Their functionality overlaps.
 
-## qmock.stub( )
+### qmock.stub( )
 
 With no arguments, returns an instrumented anonymous function like `qmock.spy()`.
 
-## qmock.stub( func )
+### qmock.stub( func )
 
 Return an instrumented anonymous function that will invoke `func`.  `restore()` returns
 the original `func`.
 
-## qmock.stub( object, methodName [,overrideFunction] )
+### qmock.stub( object, methodName [,overrideFunction] )
 
 Replace the named method of `object` with an anonymous noop function or the specified
 override, and return a stub object that will contain information about calls to the
@@ -104,6 +104,60 @@ Use `spy` to passively examine calls to an existing method or function.
 
 Returns a `stub` object that is updated with information about the last call's
 arguments, return value, exception thrown, and callback arguments:
+
+### Stub Methods
+
+### stub.returns( value )
+
+Make the stub return `value` when called.  Returns the `stub` for call chaining.
+Calling `returns` on a spy converts it into a stub.
+
+### stub.yields( [val1, val2, ...] )
+
+Make the stub call its callback with the provided values `[val1, val2, ...]`.  The callback
+is assumed to be the first function in the stub argument list.  Returns the `stub` for chaining.
+Calling `yields` on a spy converts it into a stub.
+
+The callback is invoked synchronously, before the stub returns.  Use `yieldsAsync` to
+call back after a small pause.
+
+### stub.throws( error )
+
+Make the stub throw the given `error` value.  Returns the `stub` for chaining.
+If a stub both yields and throws, it will throw first and call the callback on the
+next event loop tick.
+Calling `throws` on a spy converts it into a stub.
+
+### stub.returnsOnce( value )
+
+Like `stub.returns`, but only returns the value once.  `returnsOnce` actions are
+performed in sequence, so stub.returnsOnce(1).returnsOnce(2) will return first 1 then
+2.  Returns the `stub` for call chanining.
+
+After all `stub.returnsOnce` values have been returned, all subsequent calls will
+return the `stub.returns` value.
+
+### stub.yieldsOnce( [val1, val2, ...] )
+
+Like `stub.yields`, but calls back only once.  `yieldsOnce` actions are performed in
+sequence.  Returns the `stub` for call chaining.
+
+After all the `stub.yieldsOnce` callbacks have been made, all subsequent calls will
+call back with the `stub.yields` values.
+
+The callback is invoked synchronously, before the stub returns.  Use `yieldsAsyncOnce`
+to call back after a small pause.
+
+### stub.throwsOnce( error )
+
+Like `stub.throws`, but throws only once.
+
+### stub.restore( ), spy.restore( )
+
+Unhook the spy or stub, and restore the original method back onto the object.
+Returns the original spied-on/stubbed method, function, or property.
+
+### Stub and Spy Properties
 
 ### stub.callCount
 
@@ -129,16 +183,16 @@ any call to the stub.
 
 ### stub.callCallbackArguments
 
-If the last argument passed to a stub is a function, it will be assumed to be the
-callback.  A copy of the arguments passed to the callback will be be in
-`callCallbackArguments`.  Note:  callbacks are not synchronized with calls to the
-stub, so the callback arguments may not be from the most recent call.
+If a spied-on method is passed an argument of type "function", it will be assumed to
+be the method callback and will be instrumented to track what it returns.  A copy of
+the callback arguments with will be placed into `spy.callCallbackArguments`.  Only the
+first function-type argument is instrumented.
 
-### stub.restore( )
+Note:  callbacks are not synchronized with calls to the stub, so the callback
+arguments may not be from the most recent call.
 
-Remove the stub and restore the original method back onto the object.
-Bare functions cannot be restored, only object methods can.
-Returns the original spied-on or stubbed method.
+Note: qmock versions 0.10.2 and earlier looked for a callback only in the last
+argument position; qmock 0.11.0 and up look for the first argument of type "function".
 
 Example:
 
@@ -161,7 +215,15 @@ Example:
     console.log("this line will not appear");
     // no output, line not reached
 
-## qmock.spy( [func] )
+
+Example:
+
+    process.exit = qmock.stub(process.exit);
+    process.exit();
+    // did not exit!
+    process.exit = process.exit.restore();
+
+### qmock.spy( [func] )
 
 Spy on calls to the given function.  Returns an instrumented function that tracks
 calls to `func`.  If no func is given, an anonymous function is created to be spied
@@ -181,7 +243,7 @@ Example
     // spyFunc.stub.callCount => 1
     // spyFunc.stub.callArguments => [1, 2]
 
-## qmock.spy( object, methodName [,override] )
+### qmock.spy( object, methodName [,override] )
 
 Spy on calls to the named method of the object.  If the `override` function is given,
 the method will be replaced with the override.  Returns a `spy` object that holds
@@ -214,11 +276,13 @@ For convenience, this information is also available in the `spy.args` array.
 ### spy.getAllResults( )
 
 Return the values returned by the first 10 calls to the spied function.
+Also available as `spy.returnValues`.
 
 ### spy.getAllErrors( )
 
 Return the errors thrown by the first 10 calls to the spied function.  If no error
 was thrown by a call, the array contains a `null` entry for it.
+Also available as `spy.exceptions`.
 
 ### spy.getAllCallbackArguments( )
 
@@ -241,12 +305,12 @@ Example
     process.stderr.write("another message\n");
     // => another message
 
-## qmock.stubOnce( object, methodName [,overrideFunction] )
+### qmock.stubOnce( object, methodName [,overrideFunction] )
 
 One-shot stub:  stub the method like `qmock.stub()`, but `restore` the original
 method after the first call.
 
-## qmock.spyOnce( object, methodName [,override] )
+### qmock.spyOnce( object, methodName [,override] )
 
 One-shot spy:  spy on the function or method like `qmock.spy()`, but `restore` the
 original after the first call.
