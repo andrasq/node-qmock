@@ -211,7 +211,7 @@ module.exports = {
                 t.ok(spy.called);
                 called = [a, b, c];
                 t.deepEqual(called, [1, 2, undefined]);
-                t.ok(Date.now() > start + 1);
+                t.ok(Date.now() >= start + 1);
                 t.done();
             };
             var spy = qmock.stub(function(){}).yieldsAsync(1, 2).throws(1234);
@@ -690,10 +690,10 @@ module.exports = {
             var stub = qmock.stub().yieldsAsync(1, 2).yieldsAsyncOnce(2, 3).yieldsAsyncOnce(3, 4);
             t.expect(12);
             var start = Date.now();
-            stub(function(a, b) { t.equal(a, 2); t.equal(b, 3); t.ok(Date.now() > start + 1); }, 20, 30);
-            stub(10, function(a, b) { t.equal(a, 3); t.equal(b, 4); t.ok(Date.now() > start + 1); }, 30);
-            stub(10, 20, function(a, b) { t.equal(a, 1); t.equal(b, 2); t.ok(Date.now() > start + 1); });
-            stub(10, 20, function(a, b) { t.equal(a, 1); t.equal(b, 2); t.ok(Date.now() > start + 1); });
+            stub(function(a, b) { t.equal(a, 2); t.equal(b, 3); t.ok(Date.now() >= start + 1); }, 20, 30);
+            stub(10, function(a, b) { t.equal(a, 3); t.equal(b, 4); t.ok(Date.now() >= start + 1); }, 30);
+            stub(10, 20, function(a, b) { t.equal(a, 1); t.equal(b, 2); t.ok(Date.now() >= start + 1); });
+            stub(10, 20, function(a, b) { t.equal(a, 1); t.equal(b, 2); t.ok(Date.now() >= start + 1); });
             setTimeout(function(){
                 t.done();
             }, 5);
