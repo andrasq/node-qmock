@@ -86,7 +86,8 @@ A spy instruments an existing method (or function) and tracks calls made to it. 
 original method contiues to work exactly as before.
 
 A stub temporarily replaces an existing method (or function), or creates an anonymous
-function and spies on the replacement.  The original method is not called until restored..
+function and spies on the replacement.  The original method will not be accessible
+until after it's `restore`-d.
 
 ### qmock.spy( [func] )
 
