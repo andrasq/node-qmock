@@ -543,6 +543,9 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.11.0 - treat as callback the first function (not the last arg),
+           new: stub/spy methods yields(), returns(), throws(), yieldsOnce(), returnsOnce(), throwsOnce()
+           fix: record actual callback arg not the internal callback spy
 - 0.10.2 - fix unrequire() of ./ and ../ relative filepaths
 - 0.10.1 - fix stubbing a method on a function
 - 0.10.0 - save 3 results in stub(), always return a function from spy() and stub(), make restore() return the original func,
@@ -589,8 +592,4 @@ Todo
 - .when().timeout(ms) action to emulate a req timeout
 - todo: publish req._mockWrites, useful for debugging
 - todo: error out on write after end, to catch errors
-- todo: stub().throws(string or Error) - always throw
-- todo: stub().returns(value) - always return value
-- todo: stub().callsBack(err, value) - always return value to callback
 - could use a `makeRequest()` mockHttp action to return an actual http request
-- fix callArgs to save user-passed callback func, not the interceptor
