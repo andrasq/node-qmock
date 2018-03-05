@@ -521,7 +521,7 @@ module.exports = {
 
         'spy should return a stub': function(t) {
             var spy = qmock.spy(this.obj, 'call');
-            t.equal(spy._type, 'qmockStub');
+            t.equal(spy._type, 'QmockStubContext');
             t.done();
         },
 
