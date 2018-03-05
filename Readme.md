@@ -545,6 +545,7 @@ Change Log
 
 - 0.11.0 - treat as callback the first function (not the last arg),
            new: stub/spy methods yields(), returns(), throws(), yieldsOnce(), returnsOnce(), throwsOnce()
+           new: stub/spy methods calledBefore(), calledAfter()
            fix: record actual callback arg not the internal callback spy
 - 0.10.2 - fix unrequire() of ./ and ../ relative filepaths
 - 0.10.1 - fix stubbing a method on a function
