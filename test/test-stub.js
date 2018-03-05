@@ -12,6 +12,7 @@ var util = require('util');
 
 var QMock = require('../');
 var qmock = QMock;
+var stub = require('../lib/stub');
 
 module.exports = {
 
@@ -33,6 +34,7 @@ module.exports = {
             t.equal(stub.stub, stub);
             t.equal(stub.stub._saveLimit, 3);
 
+            // backward compat
             var stub2 = qmock.stub(null, function(){});
             t.equal(typeof stub2, 'function');
             t.equal(stub2.stub, stub2);
@@ -46,6 +48,63 @@ module.exports = {
             stub3();
             t.equal(stub3.callCount, 2);
 
+            t.done();
+        },
+
+        'stub should override': function(t) {
+            var called = false;
+
+            var stub = qmock.stub(function(){ called = 10 });
+            stub();
+            t.equal(called, false);
+            t.ok(stub.called);
+            t.equal(stub.callCount, 1);
+            t.equal(stub.args.length, 1);
+            stub.restore()();
+            t.equal(called, 10);
+
+            var stub = qmock.stub(function(){ called = 21 }, null, function(){ called = 22 });
+            stub();
+            t.equal(called, 22);
+            t.ok(stub.called);
+            stub.restore()();
+            t.equal(called, 21);
+
+            var stub = qmock.stub(function(){ called = 31 }, function(){ called = 32 });
+            stub();
+            t.equal(called, 32);
+            t.ok(stub.called);
+            stub.restore()();
+            t.equal(called, 31);
+
+            called = 1;
+            var obj = { fn: function(){ called = 41 } };
+            var stub = qmock.stub(obj, 'fn');
+            obj.fn();
+            t.equal(called, 1);
+            t.ok(stub.called);
+            t.equal(stub.restore(), obj.fn);
+            obj.fn();
+            t.equal(called, 41);
+
+            called = 1;
+            var obj = { fn: function(){ called = 51 } };
+            var stub = qmock.stub(obj, 'fn', function(){ called = 52 });
+            obj.fn();
+            t.equal(called, 52);
+            t.ok(stub.called);
+            t.equal(stub.restore(), obj.fn);
+            obj.fn();
+            t.equal(called, 51);
+
+            t.done();
+        },
+
+        'stub should throw on invalid call args': function(t) {
+            t.throws(function(){ qmock.stub(null, 'fname') }, /null object/);
+            t.throws(function(){ qmock.stub({}, 'fname', 1) }, /not a function/);
+            t.throws(function(){ qmock.stub(1, 2, 'three') }, /invalid arguments.*number,number,string/);
+            t.throws(function(){ qmock.stub(1, null, 3) }, /invalid arguments.*number,null,number/);
             t.done();
         },
 
@@ -165,7 +224,7 @@ module.exports = {
             var stub = qmock.stub(this.obj, 'call', function mycall() {
                 if (++ncalls < 2) return 1;
                 throw myError;
-            }, { saveLimit: 2 })
+            }).configure('saveLimit', 2);
             this.obj.call(1);
             try {
                 this.obj.call(7, 6, 5);
@@ -190,7 +249,7 @@ module.exports = {
             var stub = qmock.stub(this.obj, 'call', function mycall(a, b, cb) {
                 cb(null, b);
                 return 456;
-            }, { saveLimit: 2 })
+            }).configure('saveLimit', 2);
             t.expect(8);
             this.obj.call(33, 77, function mycb(err, b) {
                 t.equal(stub.callCount, 1);
@@ -210,17 +269,31 @@ module.exports = {
             this.obj.call = function(cb) {
                 cb();
             }
-            var stub = qmock.stub(this.obj, 'call', { saveLimit: 1, stubWithSelf: true });
+            var stub = qmock.stub(this.obj, 'call', this.obj.call);
             try {
                 this.obj.call(function callbackThatThrows() { throw myError })
                 t.fail("should have thrown");
             }
             catch (err) {
+                stub.restore();
                 t.equal(err, myError);
                 t.equal(stub.callError, myError);
                 t.equal(stub.callCallbackError, myError);
-                t.done();
             }
+
+            var spy = qmock.spy(this.obj, 'call')
+            try {
+                this.obj.call(function callbackThatThrows() { throw myError });
+                t.fail('should have thrown');
+            }
+            catch (err) {
+                spy.restore();
+                t.equal(err, myError);
+                t.equal(spy.callError, myError);
+                t.equal(spy.callCallbackError, myError);
+            }
+
+            t.done();
         },
 
         'stub should default to 3 saved calls': function(t) {
@@ -228,6 +301,8 @@ module.exports = {
             var stub;
             stub = qmock.stub();
             t.equal(stub.stub._saveLimit, 3);
+            stub = qmock.stub().configure('saveLimit', 123);
+            t.equal(stub.stub._saveLimit, 123);
             stub = qmock.stub(function(){});
             t.equal(stub.stub._saveLimit, 3);
             stub = qmock.stub({ fn: function(){} }, 'fn');
@@ -267,6 +342,14 @@ module.exports = {
             t.equal(spyFunc.stub.callCount, 1);
             t.equal(spyFunc.stub.callArguments[0], 12);
             t.equal(spyFunc.stub.callArguments[1], 345);
+            t.done();
+        },
+
+        'spy should invoke stub': function(t) {
+            var spy = stub.spyOnce(stub, 'stub');
+            var fn = function(){};
+            stub.spy(fn)();
+            t.ok(spy.called);
             t.done();
         },
 
@@ -366,7 +449,7 @@ module.exports = {
         },
 
         'spy should record first N calls ': function(t) {
-            var stub = qmock.spy(this.obj, 'call', { saveLimit: 2 });
+            var stub = qmock.spy(this.obj, 'call').configure('saveLimit', 2);
             this.obj.call(1);
             this.obj.call(2, 2);
             this.obj.call(3, 3, 3);
@@ -381,7 +464,7 @@ module.exports = {
         },
 
         'spy should record first N callbacks': function(t) {
-            var stub = qmock.spy(this.obj, 'callcb', { saveLimit: 2 });
+            var stub = qmock.spy(this.obj, 'callcb').configure('saveLimit', 2);
             var cb = qmock.spy();
             this.obj.callcb(1, cb);
             this.obj.callcb(22, cb);
@@ -479,6 +562,8 @@ module.exports = {
             t.notEqual(obj.fn, fn);
             obj.fn(11);
             t.equal(obj.fn, fn);
+            t.equal(ncalls, 1);
+            t.equal(spy.callCount, 1);
             obj.fn(22);
             // spy passes through the calls, both should show up
             t.equal(ncalls, 2);
