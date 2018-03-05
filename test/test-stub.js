@@ -189,6 +189,37 @@ module.exports = {
             });
         },
 
+        'stub.yieldsAsync should return and call back in a few ms': function(t) {
+            var called;
+            var cb = function(a, b, c){ called = [a, b, c] };
+            var spy = qmock.stub(function(){}).yieldsAsync(1, 2).returns(1234);
+            var ret = spy(11, 22, cb, 13);
+            t.ok(spy.called);
+            t.equal(ret, 1234);
+            t.equal(called, undefined);
+            setTimeout(function(){
+                t.ok(spy.called);
+                t.deepEqual(called, [1, 2, undefined]);
+                t.done();
+            }, 5);
+        },
+
+        'stub.yieldsAsync should throw and call back in a few ms': function(t) {
+            var called;
+            var start = Date.now();
+            var cb = function(a, b, c) {
+                t.ok(spy.called);
+                called = [a, b, c];
+                t.deepEqual(called, [1, 2, undefined]);
+                t.ok(Date.now() > start + 1);
+                t.done();
+            };
+            var spy = qmock.stub(function(){}).yieldsAsync(1, 2).throws(1234);
+            t.throws(function(){ spy(11, 22, cb, 13) }, /1234/);
+            t.ok(spy.called);
+            t.equal(called, undefined);
+        },
+
         'on a function': {
             'stub should stub': function(t) {
                 var called;
@@ -653,6 +684,19 @@ module.exports = {
             stub(10, 20, function(a, b) { t.equal(a, 1); t.equal(b, 2); });
             stub(10, 20, function(a, b) { t.equal(a, 1); t.equal(b, 2); });
             t.done();
+        },
+
+        'stub.yieldsOnceAsync should yield once': function(t) {
+            var stub = qmock.stub().yieldsAsync(1, 2).yieldsAsyncOnce(2, 3).yieldsAsyncOnce(3, 4);
+            t.expect(12);
+            var start = Date.now();
+            stub(function(a, b) { t.equal(a, 2); t.equal(b, 3); t.ok(Date.now() > start + 1); }, 20, 30);
+            stub(10, function(a, b) { t.equal(a, 3); t.equal(b, 4); t.ok(Date.now() > start + 1); }, 30);
+            stub(10, 20, function(a, b) { t.equal(a, 1); t.equal(b, 2); t.ok(Date.now() > start + 1); });
+            stub(10, 20, function(a, b) { t.equal(a, 1); t.equal(b, 2); t.ok(Date.now() > start + 1); });
+            setTimeout(function(){
+                t.done();
+            }, 5);
         },
 
         'stub.throwsOnce should throw once': function(t) {
