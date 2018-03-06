@@ -125,6 +125,20 @@ module.exports = {
         t.done();
     },
 
+    'should throw if cannot resolve file': function(t) {
+        // cannot resolve file, should throw
+        t.throws(function(){ mockRequire.mockRequire('./nonesuch.js', {}) }, /Cannot find module/);
+        t.throws(function(){ mockRequire.mockRequire('../lib/nonesuch.js', {}) }, /Cannot find module/);
+        t.throws(function(){ mockRequire.mockRequire('/nonesuch.js', {}) }, /Cannot find module/);
+
+        // not a file, should not throw
+        mockRequire.mockRequire('nonesuch');
+        mockRequire.mockRequire('nonesuch/lib/subpath');
+        mockRequire.mockRequire('...nonesuch.js');
+
+        t.done();
+    },
+
     'unrequire': {
         'should remove all instances of the module': function(t) {
             var url = require('../package');

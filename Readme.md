@@ -623,6 +623,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.11.2 - fix filepath resolution for _require, mockRequire and mockRequireStub, and throw if cannot find file
 - 0.11.1 - stub internal reorg, implement getCall/yieldsAsync/yieldsAsyncOnce, cleanups
 - 0.11.0 - treat as callback the first function (not the last arg),
            new: stub/spy methods yields(), returns(), throws(), yieldsOnce(), returnsOnce(), throwsOnce()
