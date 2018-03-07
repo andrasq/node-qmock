@@ -72,14 +72,17 @@ module.exports = {
             var expects = function(){};
             var method = function(){};
             var check = function(){};
+
             var mock1 = qmock.getMock({});
+            t.ok(typeof mock1.expects == 'function' && mock1.expects != expects);
+            t.ok(typeof mock1.method == 'function' && mock1.method != method);
+            t.ok(typeof mock1.check == 'function' && mock1.check != check);
+
             var mock2 = qmock.getMock({ expects: expects, method: method, check: check });
             t.equal(mock2.expects, expects);
             t.equal(mock2.method, method);
             t.equal(mock2.check, check);
-            t.ok(typeof mock1.expects == 'function' && mock1.expects != expects);
-            t.ok(typeof mock1.method == 'function' && mock1.method != method);
-            t.ok(typeof mock1.check == 'function' && mock1.check != check);
+
             t.done();
         },
 
@@ -260,6 +263,36 @@ module.exports = {
             var expected = QMock.getMock({}).expects(0);
             t.equal(typeof expected, 'object');
             t.ok(!(expected instanceof QMock));
+            t.done();
+        },
+
+        'should clone a hash': function(t) {
+            var object = { x: 1 };
+            var mock = QMock.getMock(object);
+            t.equal(mock.x, 1);
+            t.deepEqual(mock.__proto__, object.__proto__);
+            t.done();
+        },
+
+        'should clone an instance': function(t) {
+            function F() { this.a = 1 };
+            F.prototype.x = 100;
+            var object = new F();
+            var mock = QMock.getMock(object);
+            t.ok(mock instanceof F);
+            t.equal(mock.x, 100);
+            t.equal(mock.a, 1);
+            t.contains(Object.keys(mock), Object.keys(object));
+            t.equal(mock.__proto__, object.__proto__);
+            t.done();
+        },
+
+        'should clone properties': function(t) {
+            var obj = { x: 100 };
+            Object.defineProperty(obj, 'x', { enumerable: false });
+            var mock = QMock.getMock(obj);
+            t.equal(mock.x, 100);
+            t.contains(Object.getOwnPropertyDescriptor(obj, 'x'), { writable: true, enumerable: false, value: 100 });
             t.done();
         },
 

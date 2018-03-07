@@ -16,6 +16,8 @@ var mockHttp = require('../lib/mockHttp');
 var mockTimers = require('../lib/mockTimers');
 var MockTimers = mockTimers.MockTimers;
 
+// tests break if set var setImmediate = global.setImmediate
+
 module.exports = {
     'mockTimers': {
         before: function(done) {
