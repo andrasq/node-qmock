@@ -14,6 +14,8 @@ var QMock = require('../');
 var qmock = QMock;
 var stub = require('../lib/stub');
 
+var setImmediate = global.setImmediate || process.nextTick;
+
 module.exports = {
 
     'stub': {
@@ -187,6 +189,24 @@ module.exports = {
                 t.deepEqual(called, [1, 2, undefined]);
                 t.done();
             });
+        },
+
+        'stub.yields should return on next tick even if no setImmediate': function(t) {
+            var called;
+            var cb = function(a, b, c){ called = [a, b, c] };
+            t.unrequire('../lib/stub');
+            var saveSetImmediate = global.setImmediate;
+            delete global.setImmediate;
+            var stub = require('../lib/stub');
+            global.setImmediate = saveSetImmediate;
+            var spy = stub.stub(function(){}).yields(1, 2).throws(1234);
+            t.throws(function(){ spy(11, 22, cb, 33) }, /1234/);
+            t.ok(spy.called);
+            setImmediate(function(){
+                t.deepEqual(called, [1, 2, undefined]);
+                t.unrequire('../lib/stub');
+                t.done();
+            })
         },
 
         'stub.yieldsAsync should return and call back in a few ms': function(t) {
