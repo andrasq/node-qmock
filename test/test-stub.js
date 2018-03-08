@@ -194,7 +194,7 @@ module.exports = {
         'stub.yields should return on next tick even if no setImmediate': function(t) {
             var called;
             var cb = function(a, b, c){ called = [a, b, c] };
-            t.unrequire('../lib/stub');
+            qmock.unrequire('../lib/stub');
             var saveSetImmediate = global.setImmediate;
             delete global.setImmediate;
             var stub = require('../lib/stub');
@@ -204,7 +204,7 @@ module.exports = {
             t.ok(spy.called);
             setImmediate(function(){
                 t.deepEqual(called, [1, 2, undefined]);
-                t.unrequire('../lib/stub');
+                qmock.unrequire('../lib/stub');
                 t.done();
             })
         },
