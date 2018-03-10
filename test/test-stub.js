@@ -729,7 +729,7 @@ module.exports = {
         },
 
         'stub._mockOnce yields should require an array': function(t) {
-            t.ok(qmock.stub()._mockOnce(false, ));
+            t.ok(qmock.stub()._mockOnce(false));
             t.ok(qmock.stub()._mockOnce(false, null));
             t.ok(qmock.stub()._mockOnce(false, null, null));
             t.ok(qmock.stub()._mockOnce(false, null, null, null));
