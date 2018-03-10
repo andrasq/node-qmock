@@ -729,61 +729,97 @@ module.exports = {
         },
 
         'stub._mockOnce yields should require an array': function(t) {
-            t.ok(qmock.stub()._mockOnce());
-            t.ok(qmock.stub()._mockOnce(null));
-            t.ok(qmock.stub()._mockOnce(null, null));
-            t.ok(qmock.stub()._mockOnce(null, null, null));
-            t.ok(qmock.stub()._mockOnce(null, null, []));
-            t.throws(function(){ qmock.stub()._mockOnce(null, null, 1) });
-            t.throws(function(){ qmock.stub()._mockOnce(null, null, false) });
+            t.ok(qmock.stub()._mockOnce(false, ));
+            t.ok(qmock.stub()._mockOnce(false, null));
+            t.ok(qmock.stub()._mockOnce(false, null, null));
+            t.ok(qmock.stub()._mockOnce(false, null, null, null));
+            t.ok(qmock.stub()._mockOnce(false, null, null, []));
+            t.throws(function(){ qmock.stub()._mockOnce(false, null, null, 1) });
+            t.throws(function(){ qmock.stub()._mockOnce(false, null, null, false) });
             t.done();
         },
 
-        'getCall should return info about function call': function(t) {
-            var spy = qmock.stub().returnsOnce(11).returnsOnce(12).throwsOnce(13);
-            spy(1);
-            spy(2, 3);
-            try { spy() } catch (e) { }
+        'getCall': {
 
-            var call0 = spy.getCall(0);
-            t.deepEqual(call0.args, [1]);
-            t.deepEqual(call0.returnValue, 11);
+            'getCall should return info about function call': function(t) {
+                var spy = qmock.stub().returnsOnce(11).returnsOnce(12).throwsOnce(13);
+                spy(1);
+                spy(2, 3);
+                try { spy() } catch (e) { }
 
-            var call1 = spy.getCall(1);
-            t.deepEqual(call1.args, [2, 3]);
-            t.deepEqual(call1.returnValue, 12);
+                var call0 = spy.getCall(0);
+                t.deepEqual(call0.args, [1]);
+                t.deepEqual(call0.returnValue, 11);
 
-            var call2 = spy.getCall(2);
-            t.deepEqual(call2.args, []);
-            t.deepEqual(call2.returnValue, undefined);
-            t.deepEqual(call2.exception, 13);
+                var call1 = spy.getCall(1);
+                t.deepEqual(call1.args, [2, 3]);
+                t.deepEqual(call1.returnValue, 12);
 
-            t.done();
+                var call2 = spy.getCall(2);
+                t.deepEqual(call2.args, []);
+                t.deepEqual(call2.returnValue, undefined);
+                t.deepEqual(call2.exception, 13);
+
+                t.done();
+            },
+
+            'getCall should return info about method call': function(t) {
+                var obj = { fn: function(){ return 7 }  };
+                var spy = qmock.spy(obj, 'fn').returnsOnce(123).throwsOnce(4444);
+
+                obj.fn(1, 2);
+                try { obj.fn() } catch (e) { }
+                t.deepEqual(spy.getCall(0).args, [1, 2]);
+                t.equal(spy.getCall(0).returnValue, 123);
+                t.equal(spy.getCall(0).this, obj);
+                t.equal(spy.getCall(1).exception, 4444);
+                t.done();
+            },
+
+            'callsBefore and callsAfter should reflect call order': function(t) {
+                var spy1 = qmock.stub();
+                var spy2 = qmock.stub();
+                t.ok(!spy1.calledBefore(spy2) && !spy1.calledAfter(spy2));
+                spy1();
+                spy2();
+                t.ok(spy1.calledBefore(spy2) && spy2.calledAfter(spy1));
+                spy1();
+                t.ok(spy2.calledBefore(spy1) && spy1.calledAfter(spy2));
+                t.done();
+            },
         },
 
-        'getCall should return info about method call': function(t) {
-            var obj = { fn: function(){ return 7 }  };
-            var spy = qmock.spy(obj, 'fn').returnsOnce(123).throwsOnce(4444);
+        'onCall': {
+            'should return the stub': function(t) {
+                var stub = qmock.stub();
+                t.equal(stub.onCall(0), stub);
+                t.done();
+            },
 
-            obj.fn(1, 2);
-            try { obj.fn() } catch (e) { }
-            t.deepEqual(spy.getCall(0).args, [1, 2]);
-            t.equal(spy.getCall(0).returnValue, 123);
-            t.equal(spy.getCall(0).this, obj);
-            t.equal(spy.getCall(1).exception, 4444);
-            t.done();
+            'should set a use-once return value': function(t) {
+                var stub = qmock.stub().returns(999).onCall(1).returns(2).onCall(0).returns(1);
+                t.equal(stub(), 1);
+                t.equal(stub(), 2);
+                t.equal(stub(), 999);
+                t.equal(stub(), 999);
+                t.done();
+            },
+
+            'should grow retvals stack as needed': function(t) {
+                var stub = qmock.stub().onCall(2).returns(1);
+                t.strictEqual(stub(), undefined);
+                t.strictEqual(stub(), undefined);
+                t.strictEqual(stub(), 1);
+                t.done();
+            },
+
+            'non-numeric index should reset use-once retval to default':function(t) {
+                var stub = qmock.stub().onCall(0).returns(1).onCall(-1).returns(999);
+                t.equal(stub(), 1);
+                t.equal(stub(), 999);
+                t.equal(stub(), 999);
+                t.done();
+            },
         },
-
-        'callsBefore and callsAfter should reflect call order': function(t) {
-            var spy1 = qmock.stub();
-            var spy2 = qmock.stub();
-            t.ok(!spy1.calledBefore(spy2) && !spy1.calledAfter(spy2));
-            spy1();
-            spy2();
-            t.ok(spy1.calledBefore(spy2) && spy2.calledAfter(spy1));
-            spy1();
-            t.ok(spy2.calledBefore(spy1) && spy1.calledAfter(spy2));
-            t.done();
-        }
     },
 };
