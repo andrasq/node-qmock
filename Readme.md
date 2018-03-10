@@ -187,7 +187,7 @@ original after the first call.
 Make the stub return `value` when called.  Returns the `stub` for call chaining.
 Calling `returns` on a spy converts it into a stub.
 
-### stub.yields( [val1, val2, ...] )
+### stub.yields( [val1, [val2, ...]] )
 
 Make the stub call its callback with the provided values `[val1, val2, ...]`.  The callback
 is assumed to be the first function in the stub argument list.  Returns the `stub` for chaining.
@@ -196,6 +196,10 @@ Calling `yields` on a spy converts it into a stub.
 The callback is invoked synchronously, before the stub returns.  Use `yieldsAsync` to
 call back after a small pause.
 
+### stub.yieldsAsync( [val1, [val2, ...]] )
+
+Like `stub.yields`, but invoke the callback asynchronously, after a short pause.
+
 ### stub.throws( error )
 
 Make the stub throw the given `error` value.  Returns the `stub` for chaining.
@@ -203,34 +207,48 @@ If a stub both yields and throws, it will throw first and call the callback on t
 next event loop tick.
 Calling `throws` on a spy converts it into a stub.
 
+### stub.onCall( n )
+
+Make all subsequent `returns`, `yields` and `throws` calls configure the n-th
+(0-based) use-once retval.  Call `onCall(-1)` to restore the default behavior of
+configuring the permanent retval.
+
 ### stub.returnsOnce( value )
 
-Like `stub.returns`, but only returns the value once.  `returnsOnce` actions are
-performed in sequence, so stub.returnsOnce(1).returnsOnce(2) will return first 1 then
-2.  Returns the `stub` for call chanining.
+Like `stub.returns`, but only returns the value once.  Creates a new use-once retval
+and configures it to return `value`.  `returnsOnce` actions are performed in sequence,
+so `stub.returnsOnce(1).returnsOnce(2)` will return first 1 then 2.  Returns the `stub`
+for call chanining.
 
 After all `stub.returnsOnce` values have been returned, all subsequent calls will
 return the `stub.returns` value.
 
-### stub.yieldsOnce( [val1, val2, ...] )
+### stub.yieldsOnce( [val1, [val2, ...]] )
 
-Like `stub.yields`, but calls back only once.  `yieldsOnce` actions are performed in
-sequence.  Returns the `stub` for call chaining.
-
-After all the `stub.yieldsOnce` callbacks have been made, all subsequent calls will
-call back with the `stub.yields` values.
+Like `stub.yields`, but calls back with these values only once.  See also `returnsOnce`.
 
 The callback is invoked synchronously, before the stub returns.  Use `yieldsAsyncOnce`
 to call back after a small pause.
 
+### stub.yieldsAsyncOnce( [val1, [val2, ...]] )
+
+Like `stub.yieldsOnce` but invoke the callback asynchronously, after a short pause.
+
+
 ### stub.throwsOnce( error )
 
-Like `stub.throws`, but throws only once.
+Like `stub.throws`, but throws only once.  See also `returnsOnce`.
 
 ### stub.restore( ), spy.restore( )
 
 Unhook the spy or stub, and restore the original method back onto the object.
 Returns the original spied-on/stubbed method, function, or property.
+
+### stub.getCall( n )
+
+Return the n-th (0-based) call details.  The details include the the call `args`,
+its `returnValue`, and any `exception` thrown.
+
 
 ### Stub and Spy Properties
 
@@ -623,6 +641,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.12.0 - new `stub.onCall` and `stub.getCall` methods, document `yieldsAsync` and `yieldsAsyncOnce`.
 - 0.11.3 - remove dependency on mongoid, make stub work with node-v0.8 without setImmediate
 - 0.11.2 - fix filepath resolution for _require, mockRequire and mockRequireStub, and throw if cannot find file
 - 0.11.1 - stub internal reorg, implement getCall/yieldsAsync/yieldsAsyncOnce, cleanups
