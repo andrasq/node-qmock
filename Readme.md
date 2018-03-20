@@ -645,6 +645,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.13.0 - new `server.makeRequest` mock http server call
 - 0.12.0 - new `stub.onCall` and `stub.getCall` methods, document `yieldsAsync` and `yieldsAsyncOnce`.
 - 0.11.3 - remove dependency on mongoid, make stub work with node-v0.8 without setImmediate
 - 0.11.2 - fix filepath resolution for _require, mockRequire and mockRequireStub, and throw if cannot find file
@@ -699,4 +700,7 @@ Todo
 - .when().timeout(ms) action to emulate a req timeout
 - todo: publish req._mockWrites, useful for debugging
 - todo: error out on write after end, to catch errors
-- could use a `makeRequest()` mockHttp action to return an actual http request
+- maybe: allow spy.onCall() to selectively stub only some calls
+- fix: mockHttp should match default ports 80 and 443 whether or not explicitly included in url
+- fix: mockHttp should not end the call if no actions have been specified
+- fix: mockHttpServer should match routes with or without trailing `/`
