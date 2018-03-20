@@ -188,12 +188,14 @@ module.exports = {
 
         'should propagate request options headers': function(t) {
             qmock.mockHttp(function(req, res) {
-                t.deepEqual(req._headers, { 'header-one': 1, 'header-two': 2 });
+                t.deepEqual(req._headers, { 'header-one': 1, 'header-two': 2, 'header-three': 3 });
                 t.done();
             })
-            var req = http.request({ url: "http://localhost", headers: { 'Header-One': 1, 'Header-Two': 2 }}, function(res) {
+            var req = http.request({ url: "http://localhost", headers: { 'Header-One': 1, 'Header-Two': 222 }}, function(res) {
             })
-            t.deepEqual(req._headers, { 'header-one': 1, 'header-two': 2 });
+            req.setHeader('header-two', 2);
+            req.setHeader('header-three', 3);
+            t.deepEqual(req._headers, { 'header-one': 1, 'header-two': 2, 'header-three': 3 });
         },
 
         'should allow setTimeout on request': function(t) {
