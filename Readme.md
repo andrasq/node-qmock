@@ -499,6 +499,10 @@ Without arguments, `mockHttp` mocks an http server, and returns the mock server
 object.  The mock server has methods to recognize and respond to calls to mocked
 routes.
 
+    server = qmock.mockHttp();
+    server.when('http://localhost/test')
+      .end(200, 'Hello, test.');
+
 ### server.when( condition )
 
 Match the route against the condition.  If the route matches `condition`, the actions
