@@ -8,6 +8,7 @@
 var http = require('http');
 var https = require('https');
 var util = require('util');
+var events = require('events');
 
 var qmock = require('../');
 var mockHttp = require('../lib/mockHttp');
@@ -542,6 +543,102 @@ module.exports = {
                     t.done();
                 }, 5)
                 req.end()
+            },
+
+        },
+
+        'makeRequest': {
+
+            'should make real request': function(t) {
+                var calls = [];
+                var mockReq = new events.EventEmitter();
+                mockReq.write = function(){};
+                mockReq.end = function(){};
+                var spy = t.stubOnce(mockHttp._methods, 'sysHttpsRequest', function(uri) { calls.push(uri); return mockReq });
+                var mock = qmock.mockHttp()
+                    .when("http://localhost:8008/test/call")
+                      .makeRequest("https://otherhost.com:1234/other/call")
+
+                var req = http.request("http://localhost:8008/test/call", function(res) { });
+                setTimeout(function() {
+                    t.equal(calls[0].protocol, 'https:');
+                    t.equal(calls[0].hostname, 'otherhost.com');
+                    t.equal(calls[0].port, 1234);
+                    t.equal(calls[0].path, '/other/call');
+                    t.done();
+                }, 2)
+                req.on('error', function(){ t.done(err) });
+                req.end();
+            },
+
+            'should use url from the request': function(t) {
+                var calls = [];
+                var mockReq = new events.EventEmitter();
+                mockReq.write = function(){};
+                mockReq.end = function(){};
+                var spy = t.stubOnce(mockHttp._methods, 'sysHttpsRequest', function(uri) { calls.push(uri); return mockReq });
+                var mock = qmock.mockHttp()
+                    .when("https://localhost:123/test/call")
+                      .makeRequest()
+
+                var req = https.request("https://localhost:123/test/call", function(res) { });
+                setTimeout(function() {
+                    t.equal(calls[0].protocol, 'https:');
+                    t.equal(calls[0].hostname, 'localhost');
+                    t.equal(calls[0].port, 123);
+                    t.equal(calls[0].path, '/test/call');
+                    t.done();
+                }, 2)
+                req.on('error', function(){ t.done(err) });
+                req.end("foo");
+            },
+
+            'should relay request and response from real request': function(t) {
+t.skip();
+                var reqBody = null;
+                var server = http.createServer(function(req, res) {
+                    var chunks = [];
+                    req.on('data', function(chunk) {
+// FIXME: works with a real http request, data writes fail with this test server (socket hangup):
+// Works without the data write (ie, end is propagated ok, the response is relayed ok)
+                        chunks.push(chunk) });
+                    req.on('end', function() {
+                        res.write('got: (');
+                        res.write(Buffer.concat(chunks));
+                        res.write(')');
+                        res.end();
+                    })
+                    req.on('error', function(err) {
+                    })
+                });
+                server.listen(1337);
+
+                qmock.mockHttp()
+                    .when("http://localhost:1337/test/call")
+                      .makeRequest()
+                    .when("http://localhost:80/test/call")
+                      .makeRequest()
+                    .when("http://localhost:80/server_vars.php")
+                      .makeRequest()
+
+                setTimeout(function() {
+                var req = http.request("http://localhost:1337/test/call", function(res) {
+                    var response = "";
+                    res.on('data', function(chunk) { response += chunk });
+                    res.on('end', function() {
+                        server.close();
+                        t.equal(response, 'got: (test call body)');
+                        t.done();
+                    })
+                })
+                req.on('error', function(err) {
+                    t.done(err);
+                })
+
+                req.write('test call');
+                req.write(' body');
+                req.end();
+                }, 100)
             },
 
         },
