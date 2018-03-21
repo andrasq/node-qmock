@@ -552,17 +552,20 @@ module.exports = {
 
             before: function(done) {
                 var self = this;
-                this.echoChunks = [];
                 this.echoServer = http.createServer(function requestListener(req, res) {
                     var chunks = [];
                     req.on('data', function(chunk) {
-                        self.echoChunks.push(chunk);
+                        chunks.push(chunk);
                     });
                     req.on('end', function() {
-                        //qassert.equal(req.method, 'GET');
-                        //qassert.equal(req.headers['test-header-1'], 'value-1');
-                        res.writeHead(202, req._headers);
-                        res.write('echo: (' + Buffer.concat(self.echoChunks) + ')');
+                        var response = {
+                            echo: {
+                                headers: req.headers,
+                                body: Buffer.concat(chunks).toString(),
+                            }
+                        };
+                        res.writeHead(202);
+                        res.write(JSON.stringify(response));
                         res.end();
                     })
                     req.on('error', function(err) { })
@@ -575,10 +578,12 @@ module.exports = {
             },
 
             setUp: function(done) {
-                this.echoData = [];
                 this.mockReq = new events.EventEmitter();
-                this.mockReq.write = function(){};
-                this.mockReq.end = function(){};
+                this.mockReq._mockWrites = [];
+                this.mockReq._headers = {};
+                this.mockReq.write = function(chunk, encoding){ this._mockWrites.push([chunk, encoding]) };
+                this.mockReq.end = function(){ this._mockWrites.push(null) };
+                this.mockReq.setHeader = function(name, value) { this._headers[name] = value };
                 done();
             },
 
@@ -632,7 +637,23 @@ t.skip();
                 },
 
                 'should use provided body and headers': function(t) {
-t.skip();
+                    qmock.mockHttp()
+                        .when('http://host/path')
+                          .makeRequest('http://localhost:1337/path2', "alternate body", { 'custom-header-1': 1, 'custom-header-2': 2 });
+
+                    var req = http.request("http://host/path", function(res) {
+                        setImmediate(function() {
+                            var response = "";
+                            res.on('data', function(chunk) { response += chunk });
+                            res.on('end', function() {
+                                response = JSON.parse(response);
+                                t.equal(response.echo.body, 'alternate body');
+                                t.contains(response.echo.headers, { 'custom-header-1': 1, 'custom-header-2': 2 });
+                                t.done();
+                            })
+                        })
+                    })
+                    req.end();
                 },
             },
 
@@ -713,9 +734,9 @@ t.skip();
                     res.on('data', function(chunk) { response += chunk });
                     res.on('end', function() {
                         t.equal(res.statusCode, 202);
-                        t.equal(response, 'echo: (test call body)');
-                        t.contains(res.headers, { 'transfer-encoding': 'chunked' });
-                        // NOTE: unlike requests, custom headers are omitted from responses
+                        response = JSON.parse(response);
+                        t.equal(response.echo.body, 'test call body');
+                        t.contains(response.echo.headers, { 'transfer-encoding': 'chunked', 'test-header-1': 'value-1' });
                         t.done();
                     })
                 })
@@ -734,6 +755,25 @@ t.skip();
                 req.end('body');
             },
 
+            'should relay req error from real request': function(t) {
+                var error = new Error('mock req error');
+                var mockReq = this.mockReq;
+                t.stubOnce(mockHttp._methods, 'sysHttpRequest', function(uri) {
+                    setTimeout(function(){ mockReq.emit('error', error) }, 5);
+                    return mockReq;
+                });
+
+                qmock.mockHttp()
+                    .when('http://localhost/path')
+                      .makeRequest()
+
+                var req = http.request("http://localhost/path", function(res) { });
+                req.on('error', function(err) {
+                    t.equal(err, error);
+                    t.done();
+                })
+                req.end();
+            },
         },
 
         'errors': {
