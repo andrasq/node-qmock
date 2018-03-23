@@ -34,6 +34,6 @@
   "dependencies": {
   },
   "devDependencies": {
-    "qnit": "0.15.2"
+    "qnit": "0.24.0"
   }
 }
