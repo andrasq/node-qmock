@@ -139,6 +139,13 @@ module.exports = {
         t.done();
     },
 
+    'should use $cwd if cannot locate caller filepath': function(t) {
+        var noop = function(){};
+        var path = mockRequire._resolveOrSelf('./lib/mockTimers', noop);
+        t.contains(path, process.cwd());
+        t.done();
+    },
+
     'unrequire': {
         'should remove all instances of the module': function(t) {
             var url = require('../package');

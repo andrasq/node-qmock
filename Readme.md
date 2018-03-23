@@ -664,6 +664,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.13.1 - improve mockRequire code coverage (qmock now at 100%), also test with node-v9
 - 0.13.0 - new `server.makeRequest` mock http server call, fix onConsecutiveCalls to be able to return plain functions
 - 0.12.0 - new `stub.onCall` and `stub.getCall` methods, document `yieldsAsync` and `yieldsAsyncOnce`.
 - 0.11.3 - remove dependency on mongoid, make stub work with node-v0.8 without setImmediate
