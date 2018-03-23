@@ -8,8 +8,10 @@
 var http = require('http');
 var https = require('https');
 var util = require('util');
+var events = require('events');
 
 var qmock = require('../');
+var qassert = require("qnit").qassert;
 var mockHttp = require('../lib/mockHttp');
 var mockHttpServer = require('../lib/mockHttpServer');
 
@@ -544,6 +546,234 @@ module.exports = {
                 req.end()
             },
 
+        },
+
+        'makeRequest': {
+
+            before: function(done) {
+                var self = this;
+                this.echoServer = http.createServer(function requestListener(req, res) {
+                    var chunks = [];
+                    req.on('data', function(chunk) {
+                        chunks.push(chunk);
+                    });
+                    req.on('end', function() {
+                        var response = {
+                            echo: {
+                                headers: req.headers,
+                                body: Buffer.concat(chunks).toString(),
+                            }
+                        };
+                        res.writeHead(202);
+                        res.write(JSON.stringify(response));
+                        res.end();
+                    })
+                    req.on('error', function(err) { })
+                });
+                this.echoServer.listen(1337, done);
+            },
+
+            after: function(done) {
+                this.echoServer.close(done);
+            },
+
+            setUp: function(done) {
+                this.mockReq = new events.EventEmitter();
+                this.mockReq._mockWrites = [];
+                this.mockReq._headers = {};
+                this.mockReq.write = function(chunk, encoding){ this._mockWrites.push([chunk, encoding]) };
+                this.mockReq.end = function(){ this._mockWrites.push(null) };
+                this.mockReq.setHeader = function(name, value) { this._headers[name] = value };
+                done();
+            },
+
+            'should make real request': function(t) {
+                var calls = [];
+                var mockReq = this.mockReq;
+                var spy = t.stubOnce(mockHttp._methods, 'sysHttpsRequest', function(uri) { calls.push(uri); return mockReq });
+                var mock = qmock.mockHttp()
+                    .when("http://localhost:8008/test/call")
+                      .makeRequest("https://otherhost.com:1234/other/call")
+
+                var req = http.request("http://localhost:8008/test/call", function(res) { });
+                setTimeout(function() {
+                    t.equal(calls[0].protocol, 'https:');
+                    t.equal(calls[0].hostname, 'otherhost.com');
+                    t.equal(calls[0].port, 1234);
+                    t.equal(calls[0].path, '/other/call');
+                    t.done();
+                }, 10)
+                req.on('error', function(err) { t.done(err) });
+                req.end();
+            },
+
+            'should use url from the request': function(t) {
+                var calls = [];
+                var mockReq = this.mockReq;
+                var spy = t.stubOnce(mockHttp._methods, 'sysHttpsRequest', function(uri) { calls.push(uri); return mockReq });
+                var mock = qmock.mockHttp()
+                    .when("https://localhost:123/test/call")
+                      .makeRequest()
+
+                var req = https.request("https://localhost:123/test/call", function(res) { });
+                setTimeout(function() {
+                    t.equal(calls[0].protocol, 'https:');
+                    t.equal(calls[0].hostname, 'localhost');
+                    t.equal(calls[0].port, 123);
+                    t.equal(calls[0].path, '/test/call');
+                    t.done();
+                }, 10)
+                req.on('error', function(){ t.done(err) });
+                req.end("foo");
+            },
+
+            'provided params': {
+                'should use provided url': function(t) {
+t.skip();
+                },
+
+                'should use provided uri': function(t) {
+t.skip();
+                },
+
+                'should use provided body and headers': function(t) {
+                    qmock.mockHttp()
+                        .when('http://host/path')
+                          .makeRequest('http://localhost:1337/path2', "alternate body", { 'custom-header-1': 1, 'custom-header-2': 2 });
+
+                    var req = http.request("http://host/path", function(res) {
+                        setImmediate(function() {
+                            var response = "";
+                            res.on('data', function(chunk) { response += chunk });
+                            res.on('end', function() {
+                                response = JSON.parse(response);
+                                t.equal(response.echo.body, 'alternate body');
+                                t.contains(response.echo.headers, { 'custom-header-1': 1, 'custom-header-2': 2 });
+                                t.done();
+                            })
+                        })
+                    })
+                    req.end();
+                },
+            },
+
+            'https calls': {
+                'should default to http calls': function(t) {
+                    var mockReq = this.mockReq;
+                    var spy = t.stubOnce(mockHttp._methods, 'sysHttpRequest', function(uri) { return mockReq });
+                    var mock = qmock.mockHttp()
+                        .when('https://host:1234/call/path')
+                          .makeRequest({ host: 'host', port: 1234, path: '/other/path' });
+
+                    var req = https.request('https://host:1234/call/path', function(res) {
+                        setTimeout(function() {
+                            t.ok(spy.called);
+                            t.done();
+                        }, 5);
+                    })
+                    req.end();
+                },
+
+                'should make https request by protocol': function(t) {
+                    var mockReq = this.mockReq;
+                    var spy = t.stubOnce(mockHttp._methods, 'sysHttpsRequest', function(uri) { return mockReq });
+                    var mock = qmock.mockHttp()
+                        .when('https://host:1234/call/path')
+                          .makeRequest();
+
+                    var req = https.request('https://host:1234/call/path', function(res) {
+                        // mock req invokes callback before actions are performed
+                        setTimeout(function() {
+                            t.equal(spy.args[0][0].protocol, 'https:');
+                            t.done();
+                        }, 5);
+                    })
+                    req.end();
+                },
+
+                'should make https request by port': function(t) {
+                    var mockReq = this.mockReq;
+                    var spy = t.stubOnce(mockHttp._methods, 'sysHttpsRequest', function(uri) { return mockReq });
+                    var mock = qmock.mockHttp()
+                        .when('https://host:1234/call/path')
+                          .makeRequest({ host: 'host', port: 443, path: '/other/path' });
+
+                    var req = https.request('https://host:1234/call/path', function(res) {
+                        setTimeout(function() {
+                            t.ok(spy.called);
+                            t.done();
+                        }, 50);
+                    })
+                    req.end();
+                },
+
+                'should make https request by url': function(t) {
+                    var mockReq = this.mockReq;
+                    var spy = t.stubOnce(mockHttp._methods, 'sysHttpsRequest', function(uri) { return mockReq });
+                    var mock = qmock.mockHttp()
+                        .when('https://host:1234/call/path')
+                          .makeRequest();
+
+                    var req = https.request('https://host:1234/call/path', function(res) {
+                        setTimeout(function() {
+                            t.ok(spy.called);
+                            t.done();
+                        }, 50);
+                    })
+                    req.end();
+                },
+            },
+
+            'should relay request to and response from real request': function(t) {
+                qmock.mockHttp()
+                    .when("http://localhost:1337/test/call")
+                      .makeRequest()
+
+                var req = http.request("http://localhost:1337/test/call", function(res) {
+                    var response = "";
+                    res.on('data', function(chunk) { response += chunk });
+                    res.on('end', function() {
+                        t.equal(res.statusCode, 202);
+                        response = JSON.parse(response);
+                        t.equal(response.echo.body, 'test call body');
+                        t.contains(response.echo.headers, { 'transfer-encoding': 'chunked', 'test-header-1': 'value-1' });
+                        t.done();
+                    })
+                })
+                req.on('error', function(err) {
+                    t.done(err);
+                })
+
+                // WARNING: nodejs errors out GET calls with a body but without
+                // content-length or transfer-encoding set.  Error is "socket hang up",
+                // the internal error is "bytesParsed: 92, code: HPE_INVALID_METHOD".
+                //req.setHeader('Content-Length', 14);
+                req.setHeader('Transfer-Encoding', 'chunked');
+
+                req.setHeader('test-header-1', 'value-1');
+                req.write('test call ');
+                req.end('body');
+            },
+
+            'should relay req error from real request': function(t) {
+                var error = new Error('mock req error');
+                var mockReq = this.mockReq;
+                t.stubOnce(mockHttp._methods, 'sysHttpRequest', function(uri) {
+                    setTimeout(function(){ mockReq.emit('error', error) }, 5);
+                    return mockReq;
+                });
+
+                qmock.mockHttp()
+                    .when('http://localhost/path')
+                      .makeRequest()
+
+                var req = http.request("http://localhost/path", function(res) { });
+                req.on('error', function(err) {
+                    t.equal(err, error);
+                    t.done();
+                })
+                req.end();
+            },
         },
 
         'errors': {
