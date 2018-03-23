@@ -609,6 +609,25 @@ Emit an event on the `res` object.
 
 Emit the error event on the `req` object.
 
+### server.makeRequest( [url [,body [,headers]]] )
+
+Without arguments, replays the mock request:  makes a real http request with the same
+arguments as the mock, and relays the real http response to the mock response.
+
+With arguments, makes an http request to the specified url string or object, optionally
+with the given request body and request headers, and relays the real http response back
+to the mock response.  Body, if specified, must be a string or Buffer.
+
+The default request method is GET, use a uri object to override.
+
+    // mock just the third call to 'localhost:80'
+    mock = qmock.mockHttp()
+        .once("http://localhost:80").makeRequest()      // first call
+        .once("http://localhost:80").makeRequest()      // second call
+        .once("http://localhost:80").send(404, 'override with Not Found')
+        .when("http://localhost:80").makeRequest()      // all other calls
+
+
 Example
 
     var mockServer = qmock.mockHttp()
