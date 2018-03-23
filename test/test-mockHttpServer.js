@@ -315,7 +315,7 @@ module.exports = {
         'should allow multiple simultaneous urls': function(t) {
             var mock = qmock.mockHttp()
                 .when("http://host1/url1")
-                    .delay(10)
+                    .delay(50)
                     .send(200, "1")
                 .when("http://host2/url2")
                     .send(200, "2");
@@ -326,7 +326,7 @@ module.exports = {
                     responses.push(chunk.toString());
                     if (responses.length === 3) {
                         // NOTE: node-v8.1.4 failed on [0] under tracis-ci once... node timers?
-                        // NOTE: also node-v4.8.4 once.
+                        // NOTE: also node-v4.8.4 once, also node-v0.10.48 repeatedly.
                         t.ok(responses[0] === "2");
                         t.ok(responses[1] === "1");
                         t.ok(responses[2] === "1");
@@ -341,7 +341,7 @@ module.exports = {
             setTimeout(function() {
                 var req3 = http.request("http://host2/url2", checkResponse);
                 req3.end();
-            }, 4);
+            }, 10);
         },
 
         'when': {
