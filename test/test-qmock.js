@@ -178,75 +178,100 @@ module.exports = {
             t.done();
         },
 
-        'should decorate tester object': function(t) {
-            var tester = {};
-            QMock.extendWithMocks(tester);
-            t.equal(typeof tester.getMock, 'function');
-            t.equal(typeof tester.getMockSkipConstructor, 'function');
-            t.equal(typeof tester.done, 'function');
-            var decoratedMethods = [
-                'getMock', 'getMockSkipConstructor',
-                'stub', 'spy', 'mockTimers', 'unmockTimers', 'mockHttp', 'unmockHttp',
-                'mockRequire', 'mockRequireStub', 'unmockRequire', 'unrequire',
-            ];
-            for (var i=0; i<decoratedMethods.length; i++) {
-                var method = decoratedMethods[i];
-                t.equal(typeof tester[method], 'function');
-                t.equal(tester[method].name, method);
-            }
-            t.done();
-        },
-
-        'should not decorate tester twice': function(t) {
-            var tester = QMock.extendWithMocks({});
-            t.expect(1);
-            try { QMock.extendWithMocks(tester); assert(false, "expected error"); }
-            catch (err) { t.ok(true); };
-            t.done();
-        },
-
-        'should decorate with all exported methods': function(t) {
-            var tester = qmock.extendWithMocks({});
-            for (var name in qmock) {
-                if (typeof qmock[name] === 'function') {
-                    t.ok(tester[name]);
+        'extendWithMocks': {
+            'should decorate tester object': function(t) {
+                var tester = {};
+                QMock.extendWithMocks(tester);
+                t.equal(typeof tester.getMock, 'function');
+                t.equal(typeof tester.getMockSkipConstructor, 'function');
+                t.equal(typeof tester.done, 'function');
+                var decoratedMethods = [
+                    'getMock', 'getMockSkipConstructor',
+                    'stub', 'spy', 'mockTimers', 'unmockTimers', 'mockHttp', 'unmockHttp',
+                    'mockRequire', 'mockRequireStub', 'unmockRequire', 'unrequire',
+                ];
+                for (var i=0; i<decoratedMethods.length; i++) {
+                    var method = decoratedMethods[i];
+                    t.equal(typeof tester[method], 'function');
+                    t.equal(tester[method].name, method);
                 }
-                if (name !== 'getMock' && name !== 'getMockSkipConstructor') {
-                    t.equal(tester[name], qmock[name]);
+                t.done();
+            },
+
+            'should not decorate tester twice': function(t) {
+                var tester = QMock.extendWithMocks({});
+                t.expect(1);
+                try { QMock.extendWithMocks(tester); assert(false, "expected error"); }
+                catch (err) { t.ok(true); };
+                t.done();
+            },
+
+            'should decorate with all exported methods': function(t) {
+                var tester = qmock.extendWithMocks({});
+                for (var name in qmock) {
+                    if (typeof qmock[name] === 'function') {
+                        t.ok(tester[name]);
+                    }
+                    if (name !== 'getMock' && name[0] !== '_' && name !== 'getMockSkipConstructor') {
+                        t.equal(tester[name], qmock[name]);
+                    }
                 }
-            }
-            t.done();
-        },
+                t.done();
+            },
 
-        'should decorate with getMock that invokes qmock.getMock': function(t) {
-            var getMock = qmock.getMock;
-            var called = false;
-            qmock.getMock = function(){ called = arguments[2] };
-            var tester = qmock.extendWithMocks({});
-            tester.getMock(Date, [], [123]);
-            qmock.getMock = getMock;
-            t.deepEqual(called, [123]);
-            t.done();
-        },
+            'should decorate with getMock that invokes qmock.getMock': function(t) {
+                var getMock = qmock.getMock;
+                var called = false;
+                qmock.getMock = function(){ called = arguments[2] };
+                var tester = qmock.extendWithMocks({});
+                tester.getMock(Date, [], [123]);
+                qmock.getMock = getMock;
+                t.deepEqual(called, [123]);
+                t.done();
+            },
 
-        'should decorate with getMockSkipConstructor that invokes qmock.getMockSkipConstructor': function(t) {
-            var getMockSkipConstructor = qmock.getMockSkipConstructor;
-            var called = false;
-            qmock.getMockSkipConstructor = function(){ called = true };
-            var tester = qmock.extendWithMocks({});
-            tester.getMockSkipConstructor(Date);
-            qmock.getMockSkipConstructor = getMockSkipConstructor;
-            t.deepEqual(called, true);
-            t.done();
-        },
+            'should decorate with getMockSkipConstructor that invokes qmock.getMockSkipConstructor': function(t) {
+                var getMockSkipConstructor = qmock.getMockSkipConstructor;
+                var called = false;
+                qmock.getMockSkipConstructor = function(){ called = true };
+                var tester = qmock.extendWithMocks({});
+                tester.getMockSkipConstructor(Date);
+                qmock.getMockSkipConstructor = getMockSkipConstructor;
+                t.deepEqual(called, true);
+                t.done();
+            },
 
-        'decorated tester should call done method': function(t) {
-            var called = false;
-            var doneMethod = function() { called = true };
-            var tester = qmock.extendWithMocks({ done: doneMethod, testCall: function(){} }, 'done');
-            tester.done();
-            t.done();
-        },
+            'decorated tester should call existing done method': function(t) {
+                var called = false;
+                var doneMethod = function() { called = true };
+
+                var tester = qmock.extendWithMocks({});
+                tester.done();
+                t.ok(!called);
+
+                var tester2 = qmock.extendWithMocks({ done: doneMethod, testCall: function(){} }, 'done');
+                tester2.done();
+                t.ok(called);
+
+                t.done();
+            },
+
+            'decorated tester should check for expected tests': function(t) {
+                var tester = qmock.extendWithMocks({});
+                var mock1 = tester.getMock()
+                var mock2 = tester.getMock();
+                mock1.expects(1).method('a');
+                mock2.expects(0).method('b');
+                mock1.a();
+                var spy = t.spy(QMock, 'check');
+                tester.done();
+                spy.restore();
+                t.equal(spy.callCount, 2);
+                t.equal(spy.args[0][0], mock1);
+                t.equal(spy.args[1][0], mock2);
+                t.done();
+            },
+        }
     },
 
     'getMock': {
@@ -263,6 +288,18 @@ module.exports = {
             var expected = QMock.getMock({}).expects(0);
             t.equal(typeof expected, 'object');
             t.ok(!(expected instanceof QMock));
+            t.done();
+        },
+
+        'returned mock should have an id': function(t) {
+            var mock = QMock.getMock();
+            assert.ok(mock.__qmock__._id > 0);
+            t.done();
+        },
+
+        'method should throw if method already set': function(t) {
+            t.throws(function(){ QMock.getMock().expects(1).method('a').method('a') }, /already expecting/);
+            t.throws(function(){ QMock.getMock().expects(1).method('a').method('b') }, /already expecting/);
             t.done();
         },
 
@@ -380,6 +417,28 @@ module.exports = {
                 t.equal(1234, ret);
                 t.done();
             },
+
+            'should return multiple times': function(t) {
+                var mock = QMock.getMock();
+                mock.expects(2).method('m').will(QMock.returnValue(11)).will(QMock.returnValue(22));
+                var ret1 = mock.m();
+                var ret2 = mock.m();
+                var ret3 = mock.m();
+                t.equal(ret1, 11);
+                t.equal(ret2, 22);
+                t.equal(ret3, undefined);
+                t.done();
+            },
+
+            'should return on consecutive calls': function(t) {
+                var mock = QMock.getMock();
+                mock.expects('any').method('m').onConsecutiveCalls([1, 2]).onConsecutiveCalls([3]);
+                t.equal(mock.m(), 1);
+                t.equal(mock.m(), 2);
+                t.equal(mock.m(), 3);
+                t.equal(mock.m(), undefined);
+                t.done();
+            },
         },
 
         'should return argument': function(t) {
@@ -478,6 +537,27 @@ module.exports = {
             mock.m(2);
             try { mock.m(3); mock.check(); t.ok(false); }
             catch (err) { t.ok(true); }
+            t.done();
+        },
+
+        'should execute mock method with mockid': function(t) {
+            var mock = qmock.getMock();
+            var expect = mock.expects(1).method('a');
+            var calls = [];
+            expect.execute = function() { calls.push(arguments) };
+            mock.a(123, 4);
+            t.equal(calls[0][0], 'a');
+            t.equal(calls[0][1], mock.__qmock__._id);
+            t.equal(calls[0][2][0], 123);
+            t.equal(calls[0][2][1], 4);
+            t.done()
+        },
+
+        'execute should throw if mockid not found': function(t) {
+            var mock = qmock.getMock();
+            var expected = mock.expects(1).method('a');
+            delete qmock._expectingMocks[mock.__qmock__._id];
+            t.throws(function(){ mock.a() }, /unknown mock/);
             t.done();
         },
     },

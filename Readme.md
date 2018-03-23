@@ -664,7 +664,7 @@ This function can be called any time.
 Change Log
 ----------
 
-- 0.13.0 - new `server.makeRequest` mock http server call
+- 0.13.0 - new `server.makeRequest` mock http server call, fix onConsecutiveCalls to be able to return plain functions
 - 0.12.0 - new `stub.onCall` and `stub.getCall` methods, document `yieldsAsync` and `yieldsAsyncOnce`.
 - 0.11.3 - remove dependency on mongoid, make stub work with node-v0.8 without setImmediate
 - 0.11.2 - fix filepath resolution for _require, mockRequire and mockRequireStub, and throw if cannot find file
