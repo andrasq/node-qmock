@@ -490,8 +490,6 @@ Example
 
 ## qmock.mockHttp( )
 
-Experimental.
-
 `qmock.mockHttp` mimics `http[s].request` in enough detail to test not just
 applications making web requests but framework implementations.
 
@@ -548,11 +546,11 @@ to the same request.  The matching actions are run in the order defined.
         .once('http://host/getNext')
           .send(200, 'data2')
         .once('http://host/getNext')
-          .send(500, 'could not get more');
+          .send(500, 'no more data');
 
     // http.request('http://host/getNext') => 'data1', statusCode 200
     // http.request('http://host/getNext') => 'data2', statusCode 200
-    // http.request('http://host/getNext') => 'could not get more', statusCode 500
+    // http.request('http://host/getNext') => 'no more data', statusCode 500
 
 ### server.default( )
 
@@ -620,13 +618,15 @@ to the mock response.  Body, if specified, must be a string or Buffer.
 
 The default request method is GET, use a uri object to override.
 
+Here's an example that mocks just the third call, making actual web requests for the
+first, second, fourth and all subsequent calls:
+
     // mock just the third call to 'localhost:80'
     mock = qmock.mockHttp()
         .once("http://localhost:80").makeRequest()      // first call
         .once("http://localhost:80").makeRequest()      // second call
         .once("http://localhost:80").send(404, 'override with Not Found')
         .when("http://localhost:80").makeRequest()      // all other calls
-
 
 Example
 
