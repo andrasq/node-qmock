@@ -113,12 +113,12 @@ Example
 ### qmock.spy( object, methodName [,override] )
 
 Spy on calls to the named method of the object.  If the `override` function is given,
-the method will be replaced with the override.  Returns a `spy` object that holds
+the method will be replaced with the override.  Returns a `spy` function that holds
 information about the calls made.  The object method can be restored to the original
 with `spy.restore()`.
 
 The returned `spy` contains the call stats like `qmock.stub()`, with additional
-methods:
+methods (see [Stub and Spy API](#stub-and-spy-api), below).
 
 Example
 
@@ -154,7 +154,7 @@ Example:
 ### qmock.stub( object, methodName [,overrideFunction] )
 
 Replace the named method of `object` with an anonymous noop function or the specified
-override, and return a stub object that will contain information about calls to the
+override, and return a stub method that will contain information about calls to the
 method.  This form can be used to suppress or rewrite method calls.
 
 If an override function is not specified, a noop function is used (changed in 0.4.0).
