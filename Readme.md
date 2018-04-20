@@ -490,9 +490,6 @@ Example
 
 ## qmock.mockHttp( )
 
-`qmock.mockHttp` mimics `http[s].request` in enough detail to test not just
-applications making web requests but framework implementations.
-
 Without arguments, `mockHttp` mocks an http server, and returns the mock server
 object.  The mock server has methods to recognize and respond to calls to mocked
 routes.
