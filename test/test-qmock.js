@@ -86,6 +86,27 @@ module.exports = {
             t.done();
         },
 
+        'getMock should retain inherited methods': function(t) {
+            var obj = [];
+            var mock = qmock.getMock(obj);
+            t.equal(typeof mock.concat, 'function');
+            t.equal(mock.concat, obj.concat);
+            t.done();
+        },
+
+        'getMock should retain inherited methods without getPrototypeOf': function(t) {
+            var saved = Object.getPrototypeOf;
+            Object.getPrototypeOf = function(){};
+
+            var obj = [];
+            var mock = qmock.getMock(obj);
+            Object.getPrototypeOf = saved;
+
+            t.equal(typeof mock.concat, 'function');
+            t.equal(mock.concat, obj.concat);
+            t.done();
+        },
+
         'getMock should stub named methods': function(t) {
             var obj = { a: 1, f: function(){} };
             var mock = qmock.getMock(obj, ['f']);
