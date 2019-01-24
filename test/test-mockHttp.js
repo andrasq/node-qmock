@@ -191,7 +191,7 @@ module.exports = {
                 t.deepEqual(req._headers, { 'header-one': 1, 'header-two': 2, 'header-three': 3 });
                 t.done();
             })
-            var req = http.request({ url: "http://localhost", headers: { 'Header-One': 1, 'Header-Two': 222 }}, function(res) {
+            var req = http.request({ host: "localhost", path: "/some/path", headers: { 'Header-One': 1, 'Header-Two': 222 }}, function(res) {
             })
             req.setHeader('header-two', 2);
             req.setHeader('header-three', 3);
@@ -206,6 +206,15 @@ module.exports = {
             var req = http.request("http://localhost:1337", function(res) { });
             t.equal(typeof req.setTimeout, 'function');
             req.setTimeout(999999);
+            req.end();
+        },
+
+        'should add auth to url': function(t) {
+            qmock.mockHttp(function(req, res) {
+                t.contains(req.url, 'http://user1234:pass5678@somehost');
+                t.done();
+            });
+            var req = http.request({ protocol: 'http', host: 'somehost', path: '/some/path', auth: 'user1234:pass5678' }, function(res) {});
             req.end();
         },
 
