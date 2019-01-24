@@ -380,13 +380,13 @@ module.exports = {
 
             'should match by method and url string': function(t) {
                 var mock = qmock.mockHttp()
-                    .when("POST:http://localhost:1337/test/call")
-                var uri = { method: 'POST', hostname: 'localhost', port: 1337, path: "/test/call" };
+                    .when("GET:http://localhost:1337/test/call")
+                var uri = { method: 'GET', hostname: 'localhost', port: 1337, path: "/test/call" };
                 var req = http.request(uri, function(res){ t.done(); });
                 req.on('error', function(err) { t.done(err) });
                 req.end();
 
-                uri.method = 'GET';
+                uri.method = 'POST';
                 var req = http.request(uri, function(res){ t.fail(); });
                 req.on('error', function(err) { t.contains(err.message, 'no handler for') })
                 req.end();
