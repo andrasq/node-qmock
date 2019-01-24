@@ -208,5 +208,10 @@ module.exports = {
             req.setTimeout(999999);
             req.end();
         },
+
+        'should throw on invalid auth': function(t) {
+            t.throws(function(){ http.request({ protocol: 'http', host: 'somehost', path: '/some/path', auth: 1234 }, function(res) {}) });
+            t.done();
+        },
     },
 };
