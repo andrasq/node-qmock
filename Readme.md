@@ -2,7 +2,7 @@ qmock
 =====
 
 [![Build Status](https://api.travis-ci.org/andrasq/node-qmock.svg?branch=master)](https://travis-ci.org/andrasq/node-qmock)
-[![Coverage Status](https://codecov.io/github/andrasq/node-qmock/coverage.svg?branch=master)](https://codecov.io/github/andrasq/node-qmock?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/andrasq/node-qmock/badge.svg?branch=master)](https://coveralls.io/github/andrasq/node-qmock?branch=master)
 
 Light-weight test double library for easier testing of dependency injection style
 code.  Patterned somewhat after `phpunit`, which looks like `junit` I believe.
