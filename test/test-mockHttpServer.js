@@ -560,6 +560,9 @@ module.exports = {
                     req.on('end', function() {
                         var response = {
                             echo: {
+                                method: req.method,
+                                url: req.url,
+                                path: req.path,
                                 headers: req.headers,
                                 body: Buffer.concat(chunks).toString(),
                             }
@@ -627,16 +630,47 @@ module.exports = {
                 req.end("foo");
             },
 
+            'should default to GET if method deleted from req': function(t) {
+                qmock.mockHttp()
+                    .on('http://localhost:1337/some/path')
+                        .compute(function(req, res, next) { delete req.method; next() })
+                        .makeRequest();
+                var req = http.request('http://localhost:1337/some/path', function(res) {
+                    var body = '';
+                    res.on('data', function(chunk) { body += chunk });
+                    res.on('end', function() {
+                        var json = JSON.parse(body);
+                        t.equal(json.echo.method, 'GET');
+                        t.equal(json.echo.url, '/some/path');
+                        t.done();
+                    })
+                })
+                req.on('error', function(err) { t.done(err) });
+                req.end();
+            },
+
             'provided params': {
-                'should use provided url': function(t) {
-t.skip();
-                },
-
                 'should use provided uri': function(t) {
-t.skip();
+                    var uri = { method: 'POST', host: 'localhost', port: 1337, path: '/other/path2' };
+                    qmock.mockHttp()
+                        .when('http://somehost/host/path')
+                          .makeRequest(uri, "alternate body", { 'custom-header-1': 1, 'custom-header-2': 2 });
+
+                    var req = http.request('http://somehost/host/path', function(res) {
+                        var response = '';
+                        res.on('data', function(chunk) { response += chunk });
+                        res.on('end', function() {
+                            response = JSON.parse(response);
+                            t.equal(response.echo.url, '/other/path2');
+                            t.equal(response.echo.headers['custom-header-1'], 1);
+                            t.equal(response.echo.method, 'POST');
+                            t.done();
+                        })
+                    })
+                    req.end();
                 },
 
-                'should use provided body and headers': function(t) {
+                'should use provided url, body and headers': function(t) {
                     qmock.mockHttp()
                         .when('http://host/path')
                           .makeRequest('http://localhost:1337/path2', "alternate body", { 'custom-header-1': 1, 'custom-header-2': 2 });
@@ -647,6 +681,7 @@ t.skip();
                             res.on('data', function(chunk) { response += chunk });
                             res.on('end', function() {
                                 response = JSON.parse(response);
+                                t.equal(response.echo.url, '/path2');
                                 t.equal(response.echo.body, 'alternate body');
                                 t.contains(response.echo.headers, { 'custom-header-1': 1, 'custom-header-2': 2 });
                                 t.done();
