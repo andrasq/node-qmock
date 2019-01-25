@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 Andras Radics
+ * Copyright (C) 2017-2019 Andras Radics
  * Licensed under the Apache License, Version 2.0
  */
 
@@ -630,22 +630,15 @@ module.exports = {
                 req.end("foo");
             },
 
-            'should default to GET if method deleted from req': function(t) {
+            'should throw if method deleted from req': function(t) {
                 qmock.mockHttp()
                     .on('http://localhost:1337/some/path')
-                        .compute(function(req, res, next) { delete req.method; next() })
-                        .makeRequest();
+                      .compute(function(req, res, next) { delete req.method; next() })
+                      .makeRequest();
+
                 var req = http.request('http://localhost:1337/some/path', function(res) {
-                    var body = '';
-                    res.on('data', function(chunk) { body += chunk });
-                    res.on('end', function() {
-                        var json = JSON.parse(body);
-                        t.equal(json.echo.method, 'GET');
-                        t.equal(json.echo.url, '/some/path');
-                        t.done();
-                    })
                 })
-                req.on('error', function(err) { t.done(err) });
+                req.on('error', function(err) { t.contains(err.message, 'was deleted'); t.done() });
                 req.end();
             },
 
@@ -948,6 +941,21 @@ module.exports = {
                     var expect = tests[i][1];
                     var url = mockHttpServer.MockServer.buildUrl(uri);
                     t.equal(url, expect, util.format("tests[%d]: uri = %s", i, util.format(uri)));
+                }
+
+                t.done();
+            },
+        },
+
+        'parseUrl': {
+            'should parse annotated url': function(t) {
+                var tests = [
+                    [ 'post:https://user12:pass34@somehost.com/some/path1', {
+                        method: 'POST', protocol: 'https:', hostname: 'somehost.com', path: '/some/path1', auth: 'user12:pass34' } ],
+                ];
+
+                for (var i=0; i<tests.length; i++) {
+                    t.contains(mockHttpServer.MockServer.parseUrl(tests[i][0]), tests[i][1]);
                 }
 
                 t.done();

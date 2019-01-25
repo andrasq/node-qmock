@@ -661,7 +661,7 @@ This function can be called any time.
 Change Log
 ----------
 
-- 0.14.0 - use the `unrequire` code moved into the `disrequire` package, fix `makeRequest` call method
+- 0.14.0 - use the `unrequire` code moved into the `disrequire` package, fix `makeRequest` call method handling
 - 0.13.1 - improve mockRequire code coverage (qmock now at 100%), also test with node-v9
 - 0.13.0 - new `server.makeRequest` mock http server call, fix onConsecutiveCalls to be able to return plain functions
 - 0.12.0 - new `stub.onCall` and `stub.getCall` methods, document `yieldsAsync` and `yieldsAsyncOnce`.
