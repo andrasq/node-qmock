@@ -32,6 +32,7 @@
     "injection"
   ],
   "dependencies": {
+    "disrequire": "1.0.2"
   },
   "devDependencies": {
     "qnit": "0.24.0"
