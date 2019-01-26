@@ -1,40 +1,28 @@
 {
   "name": "qmock",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "class and object mocking, method stubbing and spying",
-  "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/andrasq/node-qmock"
-  },
   "main": "index.js",
-  "author": {
-    "name": "Andras",
-    "url": "http://github.com/andrasq"
-  },
+  "license": "Apache-2.0",
+
+  "author": "andrasq",
+  "repository": { "type": "git", "url": "git://github.com/andrasq/node-qmock" },
+  "readme": "see README.md in the repo",
+  "keywords": [ "Andras", "mock", "test", "unit", "stub", "spy", "mocks", "dependency", "injection" ],
+
   "engines": {
     "node": ">=0.10"
   },
-  "scripts": {
-    "test": "qnit test/test-*",
-    "coverage": "nyc --reporter text --reporter lcov npm test",
-    "clean": "rm -rf .nyc_output coverage"
-  },
-  "keywords": [
-    "Andras",
-    "mock",
-    "test",
-    "unit",
-    "stub",
-    "spy",
-    "mocks",
-    "dependency",
-    "injection"
-  ],
   "dependencies": {
     "disrequire": "1.0.2"
   },
   "devDependencies": {
     "qnit": "0.24.0"
+  },
+
+  "scripts": {
+    "test": "qnit test/test-*",
+    "coverage": "nyc --reporter text --reporter lcov npm test",
+    "clean": "rm -rf .nyc_output coverage"
   }
 }
