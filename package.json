@@ -23,6 +23,6 @@
   "scripts": {
     "test": "qnit test/test-*",
     "coverage": "nyc --reporter text --reporter lcov npm test",
-    "clean": "rm -rf .nyc_output coverage"
+    "clean": "rm -rf .nyc_output coverage npm-debug.log"
   }
 }
