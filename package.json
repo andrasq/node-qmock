@@ -14,7 +14,7 @@
     "node": ">=0.10"
   },
   "dependencies": {
-    "disrequire": "1.0.2"
+    "disrequire": "1.0.4"
   },
   "devDependencies": {
     "qnit": "0.24.0"
