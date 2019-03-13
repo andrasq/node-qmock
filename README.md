@@ -661,6 +661,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.14.2 - patch mockHttp to handle incomplete mockRequest uri
 - 0.14.1 - upgrade disrequire for fix to resolveOrSelf of caller of anonymous function
 - 0.14.0 - use the `unrequire` code moved into the `disrequire` package, fix `makeRequest` call method handling
 - 0.13.1 - improve mockRequire code coverage (qmock now at 100%), also test with node-v9
