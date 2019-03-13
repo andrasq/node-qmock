@@ -17,7 +17,7 @@
     "disrequire": "1.0.4"
   },
   "devDependencies": {
-    "assert": "1.6.1",
+    "qassert": "1.6.1",
     "qnit": "0.24.0"
   },
 
