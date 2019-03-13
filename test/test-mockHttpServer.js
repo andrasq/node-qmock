@@ -11,7 +11,7 @@ var util = require('util');
 var events = require('events');
 
 var qmock = require('../');
-var qassert = require("qnit").qassert;
+var qassert = require('qassert');
 var mockHttp = require('../lib/mockHttp');
 var mockHttpServer = require('../lib/mockHttpServer');
 

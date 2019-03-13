@@ -1,6 +1,6 @@
 {
   "name": "qmock",
-  "version": "0.14.1",
+  "version": "0.14.2",
   "description": "class and object mocking, method stubbing and spying",
   "main": "index.js",
   "license": "Apache-2.0",
@@ -17,6 +17,7 @@
     "disrequire": "1.0.4"
   },
   "devDependencies": {
+    "assert": "1.6.1",
     "qnit": "0.24.0"
   },
 
