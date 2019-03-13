@@ -2,8 +2,9 @@
   "name": "qmock",
   "version": "0.14.2",
   "description": "class and object mocking, method stubbing and spying",
-  "main": "index.js",
+  "main": "lib/qmock.js",
   "license": "Apache-2.0",
+  "files": ["README.md", "LICENSE", "lib"],
 
   "author": "andrasq",
   "repository": { "type": "git", "url": "git://github.com/andrasq/node-qmock" },
