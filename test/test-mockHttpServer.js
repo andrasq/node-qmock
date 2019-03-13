@@ -610,6 +610,31 @@ module.exports = {
                 req.end();
             },
 
+            'should make actual real request with request body': function(t) {
+                var uri = {
+                    host: 'localhost', port: 1337, protocol: 'http:', method: 'PUT', path: '/other/call2',
+                    headers: {
+                        'transfer-encoding': 'chunked',
+                    }
+                };
+                var mock = qmock.mockHttp()
+                    .when('http://localhost:8008/test/call')
+                      .makeRequest(uri);
+                var req = http.request('http://localhost:8008/test/call', function(res) {
+                    var chunks = [];
+                    res.on('data', function(chunk) { chunks.push(chunk) });
+                    res.on('end', function() {
+                        var body = Buffer.concat(chunks);
+                        body = JSON.parse(body);
+                        t.equal(body.echo.url, '/other/call2');
+                        t.equal(body.echo.method, 'PUT');
+                        t.done();
+                    })
+                })
+                req.on('error', function(err) { t.done(err) });
+                req.end('test req body');
+            },
+
             'should use url from the request': function(t) {
                 var calls = [];
                 var mockReq = this.mockReq;
@@ -630,7 +655,7 @@ module.exports = {
                 req.end("foo");
             },
 
-            'should throw if method deleted from req': function(t) {
+            'should emit error if method deleted from req': function(t) {
                 qmock.mockHttp()
                     .on('http://localhost:1337/some/path')
                       .compute(function(req, res, next) { delete req.method; next() })
@@ -669,16 +694,14 @@ module.exports = {
                           .makeRequest('http://localhost:1337/path2', "alternate body", { 'custom-header-1': 1, 'custom-header-2': 2 });
 
                     var req = http.request("http://host/path", function(res) {
-                        setImmediate(function() {
-                            var response = "";
-                            res.on('data', function(chunk) { response += chunk });
-                            res.on('end', function() {
-                                response = JSON.parse(response);
-                                t.equal(response.echo.url, '/path2');
-                                t.equal(response.echo.body, 'alternate body');
-                                t.contains(response.echo.headers, { 'custom-header-1': 1, 'custom-header-2': 2 });
-                                t.done();
-                            })
+                        var response = "";
+                        res.on('data', function(chunk) { response += chunk });
+                        res.on('end', function() {
+                            response = JSON.parse(response);
+                            t.equal(response.echo.url, '/path2');
+                            t.equal(response.echo.body, 'alternate body');
+                            t.contains(response.echo.headers, { 'custom-header-1': 1, 'custom-header-2': 2 });
+                            t.done();
                         })
                     })
                     req.end();
@@ -693,12 +716,12 @@ module.exports = {
                         .when('https://host:1234/call/path')
                           .makeRequest({ host: 'host', port: 1234, path: '/other/path' });
 
-                    var req = https.request('https://host:1234/call/path', function(res) {
-                        setTimeout(function() {
-                            t.ok(spy.called);
-                            t.done();
-                        }, 5);
-                    })
+                    var req = https.request('https://host:1234/call/path', function(res) {});
+                    setTimeout(function() {
+                        t.ok(spy.called);
+                        t.equal(spy.args[0][0].protocol, 'http:');
+                        t.done();
+                    }, 5)
                     req.end();
                 },
 
@@ -709,13 +732,11 @@ module.exports = {
                         .when('https://host:1234/call/path')
                           .makeRequest();
 
-                    var req = https.request('https://host:1234/call/path', function(res) {
-                        // mock req invokes callback before actions are performed
-                        setTimeout(function() {
-                            t.equal(spy.args[0][0].protocol, 'https:');
-                            t.done();
-                        }, 5);
-                    })
+                    var req = https.request('https://host:1234/call/path', function(res) {});
+                    setTimeout(function() {
+                        t.equal(spy.args[0][0].protocol, 'https:');
+                        t.done();
+                    }, 5);
                     req.end();
                 },
 
@@ -726,12 +747,11 @@ module.exports = {
                         .when('https://host:1234/call/path')
                           .makeRequest({ host: 'host', port: 443, path: '/other/path' });
 
-                    var req = https.request('https://host:1234/call/path', function(res) {
-                        setTimeout(function() {
-                            t.ok(spy.called);
-                            t.done();
-                        }, 50);
-                    })
+                    var req = https.request('https://host:1234/call/path', function(res) {});
+                    setTimeout(function() {
+                        t.ok(spy.called);
+                        t.done();
+                    }, 50);
                     req.end();
                 },
 
@@ -742,12 +762,11 @@ module.exports = {
                         .when('https://host:1234/call/path')
                           .makeRequest();
 
-                    var req = https.request('https://host:1234/call/path', function(res) {
-                        setTimeout(function() {
-                            t.ok(spy.called);
-                            t.done();
-                        }, 50);
-                    })
+                    var req = https.request('https://host:1234/call/path', function(res) {});
+                    setTimeout(function() {
+                        t.ok(spy.called);
+                        t.done();
+                    }, 50);
                     req.end();
                 },
             },
