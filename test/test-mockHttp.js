@@ -211,10 +211,10 @@ module.exports = {
 
         'should add auth to url': function(t) {
             qmock.mockHttp(function(req, res) {
-                t.contains(req.url, 'http://user1234:pass5678@somehost');
+                t.equals(req._headers.authorization, 'Basic dXNlcjEyMzQ6cGFzczU2Nzg=');
                 t.done();
             });
-            var req = http.request({ protocol: 'http', host: 'somehost', path: '/some/path', auth: 'user1234:pass5678' }, function(res) {});
+            var req = http.request({ protocol: 'http', host: 'somehost', path: '/some/path?a&b#hash', auth: 'user1234:pass5678' }, function(res) {});
             req.end();
         },
 

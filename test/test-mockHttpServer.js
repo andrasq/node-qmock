@@ -612,7 +612,7 @@ module.exports = {
 
             'should make actual real request with request body': function(t) {
                 var uri = {
-                    host: 'localhost', port: 1337, protocol: 'http:', method: 'PUT', path: '/other/call2',
+                    host: 'localhost', port: 1337, protocol: 'http:', method: 'PUT', path: '/other/call2?a&b',
                     headers: {
                         'transfer-encoding': 'chunked',
                     }
@@ -626,7 +626,7 @@ module.exports = {
                     res.on('end', function() {
                         var body = Buffer.concat(chunks);
                         body = JSON.parse(body);
-                        t.equal(body.echo.url, '/other/call2');
+                        t.equal(body.echo.url, '/other/call2?a&b');
                         t.equal(body.echo.method, 'PUT');
                         t.done();
                     })
