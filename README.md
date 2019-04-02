@@ -661,6 +661,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.14.3 - make mockHttpServer match paths by full url, path+query, or just pathname
 - 0.14.2 - patch mockHttp to handle incomplete mockRequest uri, fix mockHttp makeRequest to return with response
 - 0.14.1 - upgrade disrequire for fix to resolveOrSelf of caller of anonymous function
 - 0.14.0 - use the `unrequire` code moved into the `disrequire` package, fix `makeRequest` call method handling
