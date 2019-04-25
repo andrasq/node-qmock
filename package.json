@@ -15,7 +15,7 @@
     "node": ">=0.10"
   },
   "dependencies": {
-    "disrequire": "1.0.4"
+    "disrequire": "1.1.0"
   },
   "devDependencies": {
     "qassert": "1.6.1",
