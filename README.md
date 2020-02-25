@@ -661,6 +661,9 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.16.0 - breaking: fix mockHttp semantics to not auto-install on load and to uninstall completely on unmock,
+           ensure req.socket.abort and req.socket.destroy are usable after mock request starts,
+           only invoke mockHttp response handler after 30 ms unless, unless data "starts arriving" (is written), or .end()
 - 0.15.0 - expose `disrequire` under the package name as well (alias of unrequire),
            upgrade disrequire to hugely improve worst case speed
 - 0.14.3 - make mockHttpServer match paths by full url, path+query, or just pathname
@@ -730,4 +733,4 @@ Todo
 - maybe: mockHttpServer should match only path, not query string params
 - fix: http.request should emit a 'response' event, and the callback should listen for it
 - fix: support res.setEncoding (filter events? and convert as needed??)
-- fix: support req.abort() and req.socket.destroy()
+- support node-v0.8.28 (mockHttp)

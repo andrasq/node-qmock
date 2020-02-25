@@ -1,6 +1,6 @@
 {
   "name": "qmock",
-  "version": "0.15.1",
+  "version": "0.16.0",
   "description": "class and object mocking, method stubbing and spying",
   "main": "lib/qmock.js",
   "license": "Apache-2.0",
