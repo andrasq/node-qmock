@@ -222,5 +222,34 @@ module.exports = {
             t.throws(function(){ http.request({ protocol: 'http', host: 'somehost', path: '/some/path', auth: 1234 }, function(res) {}) });
             t.done();
         },
+
+        'abort should emit an error': function(t) {
+            qmock.mockHttp(function() {});
+            var req = http.request('http://somehost/some/path');
+            req.on('error', function(err) {
+                t.ok(err);
+                t.equal(err.code, 'ECONNRESET');
+                t.contains(err.message, 'socket hang up');
+                t.done();
+            })
+            req.end();
+            req.abort();
+        },
+
+        'socket.destroy should emit an error and stop delivering writes': function(t) {
+            qmock.mockHttp(function(req, res) {
+                // destroyed connections should not deliver writes
+                req.on('_mockWrite', function() { t.fail() });
+            })
+            var req = http.request('http://somehost/some/path');
+            req.on('error', function(err) {
+                t.ok(err);
+                t.ok(err.code);
+                setTimeout(t.done, 40);
+            })
+            req.socket.destroy();
+            req.write('');
+            req.end();
+        },
     },
 };
