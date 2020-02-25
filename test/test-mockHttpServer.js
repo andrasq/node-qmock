@@ -15,6 +15,9 @@ var qassert = require('qassert');
 var mockHttp = require('../lib/mockHttp');
 var mockHttpServer = require('../lib/mockHttpServer');
 
+// fromBuf adapted from qibl
+var fromBuf = eval('parseInt(process.versions.node) >= 6 ? Buffer.from : Buffer');
+
 module.exports = {
 
     'mockHttpServer': {
@@ -158,7 +161,7 @@ module.exports = {
                 var mock = qmock.mockHttp()
                     .when("http://localhost:1337/test/page")
                     .write("It")
-                    .write(new Buffer(" "))
+                    .write(fromBuf(" "))
                     .write("work", 'utf8')
                     .write("ed", 'utf8', function(){
                         wrote = true
