@@ -65,15 +65,15 @@ module.exports = {
             req.end();
         },
 
-        'should install and uninstall mock methods': function(t) {
+        'should install and uninstall mock methods, uninstalled by default': function(t) {
+            mockHttp.install();
             var req = http.request;
             var reqs = https.request;
             mockHttp.uninstall();
             t.equal(http.request, httpRequest);
             t.equal(https.request, httpsRequest);
-            mockHttp.install();
-            t.equal(http.request, req);
-            t.equal(https.request, reqs);
+            t.notEqual(http.request, req);
+            t.notEqual(https.request, reqs);
             t.done();
         },
 

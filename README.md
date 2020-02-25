@@ -728,3 +728,6 @@ Todo
 - fix: mockHttp should not end the call if no actions have been specified
 - fix: mockHttpServer should match routes with or without trailing `/`
 - maybe: mockHttpServer should match only path, not query string params
+- fix: http.request should emit a 'response' event, and the callback should listen for it
+- fix: support res.setEncoding (filter events? and convert as needed??)
+- fix: support req.abort() and req.socket.destroy()
