@@ -661,6 +661,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.16.1 - upgrade disrequire to fix global name leak `stack`
 - 0.16.0 - breaking: fix mockHttp semantics to not auto-install on load and to uninstall completely on unmock,
            ensure req.abort and req.socket.destroy are available on mock requests
 - 0.15.0 - expose `disrequire` under the package name as well (alias of unrequire),
