@@ -661,6 +661,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.16.2 - always record the first 10 calls by default, the previous 3 was too low
 - 0.16.1 - upgrade disrequire to fix global name leak `stack`
 - 0.16.0 - breaking: fix mockHttp semantics to not auto-install on load and to uninstall completely on unmock,
            ensure req.abort and req.socket.destroy are available on mock requests
@@ -726,10 +727,8 @@ Todo
 - .when().timeout(ms) action to emulate a req timeout
 - todo: publish req._mockWrites, useful for debugging
 - todo: error out on write after end, to catch errors
-- maybe: allow spy.onCall() to selectively stub only some calls
 - fix: mockHttp should match default ports 80 and 443 whether or not explicitly included in url
 - fix: mockHttp should not end the call if no actions have been specified
-- fix: mockHttpServer should match routes with or without trailing `/`
 - maybe: mockHttpServer should match only path, not query string params
 - fix: http.request should emit a 'response' event, and the callback should listen for it
 - fix: support res.setEncoding (filter events? and convert as needed??)

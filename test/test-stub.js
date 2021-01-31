@@ -34,13 +34,13 @@ module.exports = {
             var stub = qmock.stub();
             t.equal(typeof stub, 'function');
             t.equal(stub.stub, stub);
-            t.equal(stub.stub._saveLimit, 3);
+            t.equal(stub.stub._saveLimit, 10);
 
             // backward compat
             var stub2 = qmock.stub(null, function(){});
             t.equal(typeof stub2, 'function');
             t.equal(stub2.stub, stub2);
-            t.equal(stub2.stub._saveLimit, 3);
+            t.equal(stub2.stub._saveLimit, 10);
 
             var obj = {};
             var stub3 = qmock.stub(obj, 'fn');
@@ -391,27 +391,27 @@ module.exports = {
             t.done();
         },
 
-        'stub should default to 3 saved calls': function(t) {
+        'stub should default to 10 saved calls': function(t) {
             // without options
             var stub;
             stub = qmock.stub();
-            t.equal(stub.stub._saveLimit, 3);
+            t.equal(stub.stub._saveLimit, 10);
             stub = qmock.stub().configure('saveLimit', 123);
             t.equal(stub.stub._saveLimit, 123);
             stub = qmock.stub(function(){});
-            t.equal(stub.stub._saveLimit, 3);
+            t.equal(stub.stub._saveLimit, 10);
             stub = qmock.stub({ fn: function(){} }, 'fn');
-            t.equal(stub.stub._saveLimit, 3);
+            t.equal(stub.stub._saveLimit, 10);
             stub = qmock.stub({ fn: function(){} }, 'fn', function(){});
-            t.equal(stub.stub._saveLimit, 3);
+            t.equal(stub.stub._saveLimit, 10);
 
             // not included in options
             stub = qmock.stub(null, null, {});
-            t.equal(stub.stub._saveLimit, 3);
+            t.equal(stub.stub._saveLimit, 10);
             var stub = qmock.stub({fn: function(){}}, 'fn', {});
-            t.equal(stub.stub._saveLimit, 3);
+            t.equal(stub.stub._saveLimit, 10);
             var stub = qmock.stub({fn: function(){}}, 'fn', function(){}, {});
-            t.equal(stub.stub._saveLimit, 3);
+            t.equal(stub.stub._saveLimit, 10);
 
             t.done();
         },
