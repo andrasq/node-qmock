@@ -661,6 +661,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.16.3 - bump disrequire to use with source maps
 - 0.16.2 - always record the first 10 calls by default, the previous 3 was too low
 - 0.16.1 - upgrade disrequire to fix global name leak `stack`
 - 0.16.0 - breaking: fix mockHttp semantics to not auto-install on load and to uninstall completely on unmock,
