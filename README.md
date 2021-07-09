@@ -661,6 +661,8 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.16.4 - mockHttp fix req.socket for node-v0.8, avoid node v12 req._headers deprecation warning,
+           fix tests that check req._headers
 - 0.16.3 - bump disrequire to use with source maps
 - 0.16.2 - always record the first 10 calls by default, the previous 3 was too low
 - 0.16.1 - upgrade disrequire to fix global name leak `stack`

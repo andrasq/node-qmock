@@ -188,14 +188,14 @@ module.exports = {
 
         'should propagate request options headers': function(t) {
             qmock.mockHttp(function(req, res) {
-                t.deepEqual(req._headers, { 'header-one': 1, 'header-two': 2, 'header-three': 3 });
+                t.contains(getHeaders(req), { 'header-one': 1, 'header-two': 2, 'header-three': 3 });
                 t.done();
             })
             var req = http.request({ host: "localhost", path: "/some/path", headers: { 'Header-One': 1, 'Header-Two': 222 }}, function(res) {
             })
             req.setHeader('header-two', 2);
             req.setHeader('header-three', 3);
-            t.deepEqual(req._headers, { 'header-one': 1, 'header-two': 2, 'header-three': 3 });
+            t.contains(getHeaders(req), { 'header-one': 1, 'header-two': 2, 'header-three': 3 });
         },
 
         'should allow setTimeout on request': function(t) {
@@ -253,3 +253,15 @@ module.exports = {
         },
     },
 };
+
+
+// newer headers are an Object with a null constructor
+function assign(target, obj) {
+    var keys = Object.keys(obj);
+    for (var i=0; i<keys.length; i++) target[keys[i]] = obj[keys[i]];
+    return target;
+}
+// older node does not have req.getHeaders(), newer deprecates accessing req._headers,
+function getHeaders(req) {
+    return req.getHeaders ? assign({}, req.getHeaders()) : req._headers;
+}
