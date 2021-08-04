@@ -1,7 +1,7 @@
 qmock
 =====
 
-[![Build Status](https://api.travis-ci.org/andrasq/node-qmock.svg?branch=master)](https://travis-ci.org/andrasq/node-qmock)
+[![Build Status](https://api.travis-ci.com/andrasq/node-qmock.svg?branch=master)](https://travis-ci.com/andrasq/node-qmock)
 [![Coverage Status](https://coveralls.io/repos/github/andrasq/node-qmock/badge.svg?branch=master)](https://coveralls.io/github/andrasq/node-qmock?branch=master)
 
 Light-weight test double library for easier testing of dependency injection style
@@ -661,6 +661,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.16.5 - avoid Buffer deprecation warnings too
 - 0.16.4 - mockHttp fix req.socket for node-v0.8, avoid node v12 req._headers deprecation warning,
            fix tests that check req._headers
 - 0.16.3 - bump disrequire to use with source maps

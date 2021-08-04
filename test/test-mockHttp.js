@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017,2020 Andras Radics
+ * Copyright (C) 2017-2021 Andras Radics
  * Licensed under the Apache License, Version 2.0
  */
 
@@ -211,7 +211,7 @@ module.exports = {
 
         'should add auth to url': function(t) {
             qmock.mockHttp(function(req, res) {
-                t.equals(req._headers.authorization, 'Basic dXNlcjEyMzQ6cGFzczU2Nzg=');
+                t.equals(getHeaders(req).authorization, 'Basic dXNlcjEyMzQ6cGFzczU2Nzg=');
                 t.done();
             });
             var req = http.request({ protocol: 'http', host: 'somehost', path: '/some/path?a&b#hash', auth: 'user1234:pass5678' }, function(res) {});
