@@ -165,6 +165,22 @@ module.exports = {
             t.done();
         },
 
+        'stub.resolves should return a Promise': function(t) {
+            var spy = qmock.stub().resolves(123);
+            spy().then(function(val) {
+                t.equal(val, 123);
+                t.done();
+            });
+        },
+
+        'stub.rejects should return a Promise': function(t) {
+            var spy = qmock.stub().rejects('mock rejection');
+            spy().catch(function(val) {
+                t.equal(val, 'mock rejection');
+                t.done();
+            });
+        },
+
         'stub.yields should return and call back immediately': function(t) {
             var called;
             var cb = function(a, b, c){ called = [a, b, c] };

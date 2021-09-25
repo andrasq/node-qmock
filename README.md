@@ -200,6 +200,14 @@ call back after a small pause.
 
 Like `stub.yields`, but invoke the callback asynchronously, after a short pause.
 
+### stub.resolves( val )
+
+Make the stub return a Promise resolved to the value `val`.
+
+### stub.rejects( val )
+
+Make the stub return a Promise that rejects with the value `val`.
+
 ### stub.throws( error )
 
 Make the stub throw the given `error` value.  Returns the `stub` for chaining.
@@ -661,6 +669,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.17.0 - new `stub.resolves` and `stub.rejects`
 - 0.16.5 - avoid Buffer deprecation warnings too
 - 0.16.4 - mockHttp fix req.socket for node-v0.8, avoid node v12 req._headers deprecation warning,
            fix tests that check req._headers
