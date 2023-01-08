@@ -426,7 +426,7 @@ Mock Require API
 ----------------
 
 `mockRequire` overrides `require` everywhere to return the mock value
-for the named modules.
+for the named modules.  `unmockRequire` restores the system `require`.
 
 ## qmock.mockRequire( moduleName, replacement )
 
@@ -473,7 +473,7 @@ be called at any time, each replaces the previous override.  Restore the default
 system request functionality with `unmockHttp`.
 
 The `request` callback is passed the mock `res` object or the `res` supplied by the
-handler as asson as `mockResponse` event is emitted `req.emit('mockResponse', [res])`.
+handler as soon as `mockResponse` event is emitted `req.emit('mockResponse', [res])`.
 
 Note that the handler gets a client-side `http.ClientRequest` (what the client sends
 to the server) and `http.IncomingMessage` (what the client receives back), not the
