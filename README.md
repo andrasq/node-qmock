@@ -1,7 +1,7 @@
 qmock
 =====
 
-[![Build Status](https://api.travis-ci.com/andrasq/node-qmock.svg?branch=master)](https://travis-ci.com/andrasq/node-qmock)
+[![Build Status](https://app.travis-ci.com/andrasq/node-qmock.svg?branch=master)](https://travis-ci.com/github/andrasq/node-qmock)
 [![Coverage Status](https://coveralls.io/repos/github/andrasq/node-qmock/badge.svg?branch=master)](https://coveralls.io/github/andrasq/node-qmock?branch=master)
 
 Light-weight test double library for easier testing of dependency injection style
@@ -747,3 +747,4 @@ Todo
 - fix: http.request should emit a 'response' event, and the callback should listen for it
 - fix: support res.setEncoding (filter events? and convert as needed??)
 - support node-v0.8.28 (mockHttp)
+- maybe: qmock.restoreAll? qmock.resetHistory?
