@@ -669,6 +669,7 @@ This function can be called any time.
 Change Log
 ----------
 
+- 0.17.1 - fix disrequire under node-v0.6, fix mockHttp under node-v16 and up that call socket.destroy
 - 0.17.0 - new `stub.resolves` and `stub.rejects`
 - 0.16.5 - avoid Buffer deprecation warnings too
 - 0.16.4 - mockHttp fix req.socket for node-v0.8, avoid node v12 req._headers deprecation warning,
