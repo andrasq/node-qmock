@@ -15,7 +15,7 @@ before_install:
   - nvm install 0.10 && npm2 -v && node -v && npm2 test
   - nvm install 8 && npm2 -v && node -v && npm2 test
   - nvm install 12 && npm2 -v && node -v && npm2 test
-  - nvm install 18 && npm2 -v && node -v && npm2 test
+  - nvm install 17 && npm2 -v && node -v && npm2 test
   - nvm install 5.8.0
 
 after_success:
