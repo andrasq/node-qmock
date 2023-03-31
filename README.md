@@ -365,7 +365,7 @@ Mock Timers API
 work-alikes that trigger under user control.  `unmockTimers` restores the system
 timers.
 
-## qmock.mockTimers( )
+## clock = qmock.mockTimers( )
 
 Replace the nodejs timers functions `setImmediate`, `clearImmediate`, `setTimeout`
 et al with mocked versions whose time is not linear and is not limited by real
