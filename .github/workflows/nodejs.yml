@@ -8,8 +8,7 @@ jobs:
     strategy:
       matrix:
         # github ci errors out on 0.8.x deps
-        # the http mocks need node-11
-        node: [ 0.11.x, 4, 12, 16, 5.8.0 ]
+        node: [ 0.10, 4, 8, 12, 17, 5.8.0 ]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
