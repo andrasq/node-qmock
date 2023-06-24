@@ -16,7 +16,9 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm install
-      - run: npm install -g qnit npm@2.15.0
+      # FIXME: github breaks with MODULE_NOT_FOUND installing the below:
+      # - run: npm install -g qnit npm@2.15.0
+      - run: npm install -g qnit
       - run: npm test
 
       - name: coverage
