@@ -1,7 +1,6 @@
 qmock
 =====
-
-[![Build Status](https://app.travis-ci.com/andrasq/node-qmock.svg?branch=master)](https://travis-ci.com/github/andrasq/node-qmock)
+[![Build Status](https://github.com/andrasq/node-qmock/actions/workflows/nodejs.yml/badge.svg)](https://github.com/andrasq/node-qmock/actions/workflows/nodejs.yml)
 [![Coverage Status](https://coveralls.io/repos/github/andrasq/node-qmock/badge.svg?branch=master)](https://coveralls.io/github/andrasq/node-qmock?branch=master)
 
 Light-weight test double library for easier testing of dependency injection style
